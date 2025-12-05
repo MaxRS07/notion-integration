@@ -1,0 +1,508 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1545A4805FBF8671BD29DC16 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A6383E9B42C15C52DB4DE9 /* MetalKit.framework */; };
+		223289D27A97A9E1B1AD251F /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 5ECC687BFB1A23942A90A842 /* assets */; };
+		297002BF537A37B662A5AD7D /* libapp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1357618F55EE78274D4C440C /* libapp.a */; };
+		34306E520E6755A45F336EA2 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9CEA1F89B65ED519536F0AB9 /* Metal.framework */; };
+		52F16F1EDC8DFB60D8352C7C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 698E41F065A632100E0D250C /* CoreGraphics.framework */; };
+		5D6030DC0CB6DAA08E48665F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28C8C8DA5575A24332A30CDE /* Security.framework */; };
+		733441E9DE47CFA208A1602E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E9190A08CEC02FD6F241F7E /* UIKit.framework */; };
+		A9DB3DBD7BB8F99CE09CC807 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = AA9E2A18B40516B6382CF2DC /* main.mm */; };
+		C1BA5970F40565557CC21008 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B27089239A7DD7B853CE399D /* LaunchScreen.storyboard */; };
+		C7E07DD8DC97A9C70CB16A21 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A2A6F1D81A3F65D2A2F7291 /* Assets.xcassets */; };
+		D7FB943724F681D4BA2219D2 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54CBD31920248A758FCC68CF /* WebKit.framework */; };
+		DA468B6611FB0EF5E07F081D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C50FA9764A692D9719B0F957 /* QuartzCore.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		05AAE1794E4A0F1A7D7DF9F3 /* mod.rs */ = {isa = PBXFileReference; path = mod.rs; sourceTree = "<group>"; };
+		0E9190A08CEC02FD6F241F7E /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		0FC6C9EF97A7BD5A1CCDCA52 /* mod.rs */ = {isa = PBXFileReference; path = mod.rs; sourceTree = "<group>"; };
+		130DF90B3C486DA880EA88AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1357618F55EE78274D4C440C /* libapp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libapp.a; sourceTree = "<group>"; };
+		189BD6F7D3F81BEDF491B197 /* notion-integration_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "notion-integration_iOS.entitlements"; sourceTree = "<group>"; };
+		18FF9ED8928A57A2F0A29598 /* course.rs */ = {isa = PBXFileReference; path = course.rs; sourceTree = "<group>"; };
+		28C8C8DA5575A24332A30CDE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		2FE5CF8B2F6C4CA257129D90 /* client.rs */ = {isa = PBXFileReference; path = client.rs; sourceTree = "<group>"; };
+		4268075D02CA3623B934F3DE /* notion-integration_iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "notion-integration_iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		54CBD31920248A758FCC68CF /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		5CB4EC1A1FD88F8985AAEC8E /* graphql.rs */ = {isa = PBXFileReference; path = graphql.rs; sourceTree = "<group>"; };
+		5ECC687BFB1A23942A90A842 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = SOURCE_ROOT; };
+		60939C25D4E8DAD91DDF6327 /* lib.rs */ = {isa = PBXFileReference; path = lib.rs; sourceTree = "<group>"; };
+		64A1F57FF1E77B3C5449349E /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
+		698E41F065A632100E0D250C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		7A2A6F1D81A3F65D2A2F7291 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		897C28B22A632D1D6A00C2FA /* client.rs */ = {isa = PBXFileReference; path = client.rs; sourceTree = "<group>"; };
+		9CEA1F89B65ED519536F0AB9 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		AA9E2A18B40516B6382CF2DC /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		B27089239A7DD7B853CE399D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		C50FA9764A692D9719B0F957 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		CE9A1E21BF5E75AB3CFA6750 /* mod.rs */ = {isa = PBXFileReference; path = mod.rs; sourceTree = "<group>"; };
+		DD47B1859BD02EBBB1D23C87 /* mod.rs */ = {isa = PBXFileReference; path = mod.rs; sourceTree = "<group>"; };
+		EC6941E602DBE9D41FD24727 /* error.rs */ = {isa = PBXFileReference; path = error.rs; sourceTree = "<group>"; };
+		F1A6383E9B42C15C52DB4DE9 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		FA8B66F4D19DD789D724184F /* main.rs */ = {isa = PBXFileReference; path = main.rs; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5686A0C8E9302949DD8B29B9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				297002BF537A37B662A5AD7D /* libapp.a in Frameworks */,
+				52F16F1EDC8DFB60D8352C7C /* CoreGraphics.framework in Frameworks */,
+				34306E520E6755A45F336EA2 /* Metal.framework in Frameworks */,
+				1545A4805FBF8671BD29DC16 /* MetalKit.framework in Frameworks */,
+				DA468B6611FB0EF5E07F081D /* QuartzCore.framework in Frameworks */,
+				5D6030DC0CB6DAA08E48665F /* Security.framework in Frameworks */,
+				733441E9DE47CFA208A1602E /* UIKit.framework in Frameworks */,
+				D7FB943724F681D4BA2219D2 /* WebKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3714F742086533B2BE3107EA = {
+			isa = PBXGroup;
+			children = (
+				5ECC687BFB1A23942A90A842 /* assets */,
+				7A2A6F1D81A3F65D2A2F7291 /* Assets.xcassets */,
+				B27089239A7DD7B853CE399D /* LaunchScreen.storyboard */,
+				938769D76390D11B8D3FD66B /* Externals */,
+				C41BF07A16F1967FF7CF4578 /* notion-integration_iOS */,
+				544C075F2173CF45F9119F33 /* Sources */,
+				EE51216B75FA6CB13E1C27C9 /* src */,
+				BB276FEA568A039C214C8A7E /* Frameworks */,
+				C2F7F129531D1292C7AD8A4C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3D8B13626FE3D1E1DDC704CB /* notion-integration */ = {
+			isa = PBXGroup;
+			children = (
+				AA9E2A18B40516B6382CF2DC /* main.mm */,
+				72AB58359D2C9AD8F55C1F29 /* bindings */,
+			);
+			path = "notion-integration";
+			sourceTree = "<group>";
+		};
+		544C075F2173CF45F9119F33 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				3D8B13626FE3D1E1DDC704CB /* notion-integration */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		546048BBFEDD497ECD11B390 /* web */ = {
+			isa = PBXGroup;
+			children = (
+				EC6941E602DBE9D41FD24727 /* error.rs */,
+				DD47B1859BD02EBBB1D23C87 /* mod.rs */,
+				B937C62A8D0BB1B8F953C649 /* canvas */,
+				9530E5534C87456A897984AE /* notion */,
+			);
+			path = web;
+			sourceTree = "<group>";
+		};
+		72AB58359D2C9AD8F55C1F29 /* bindings */ = {
+			isa = PBXGroup;
+			children = (
+				64A1F57FF1E77B3C5449349E /* bindings.h */,
+			);
+			path = bindings;
+			sourceTree = "<group>";
+		};
+		938769D76390D11B8D3FD66B /* Externals */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Externals;
+			sourceTree = "<group>";
+		};
+		9530E5534C87456A897984AE /* notion */ = {
+			isa = PBXGroup;
+			children = (
+				897C28B22A632D1D6A00C2FA /* client.rs */,
+				CE9A1E21BF5E75AB3CFA6750 /* mod.rs */,
+			);
+			path = notion;
+			sourceTree = "<group>";
+		};
+		AAC804A3214AA1B721CE694B /* models */ = {
+			isa = PBXGroup;
+			children = (
+				18FF9ED8928A57A2F0A29598 /* course.rs */,
+				05AAE1794E4A0F1A7D7DF9F3 /* mod.rs */,
+			);
+			path = models;
+			sourceTree = "<group>";
+		};
+		B937C62A8D0BB1B8F953C649 /* canvas */ = {
+			isa = PBXGroup;
+			children = (
+				2FE5CF8B2F6C4CA257129D90 /* client.rs */,
+				5CB4EC1A1FD88F8985AAEC8E /* graphql.rs */,
+				0FC6C9EF97A7BD5A1CCDCA52 /* mod.rs */,
+				AAC804A3214AA1B721CE694B /* models */,
+			);
+			path = canvas;
+			sourceTree = "<group>";
+		};
+		BB276FEA568A039C214C8A7E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				698E41F065A632100E0D250C /* CoreGraphics.framework */,
+				1357618F55EE78274D4C440C /* libapp.a */,
+				9CEA1F89B65ED519536F0AB9 /* Metal.framework */,
+				F1A6383E9B42C15C52DB4DE9 /* MetalKit.framework */,
+				C50FA9764A692D9719B0F957 /* QuartzCore.framework */,
+				28C8C8DA5575A24332A30CDE /* Security.framework */,
+				0E9190A08CEC02FD6F241F7E /* UIKit.framework */,
+				54CBD31920248A758FCC68CF /* WebKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C2F7F129531D1292C7AD8A4C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4268075D02CA3623B934F3DE /* notion-integration_iOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C41BF07A16F1967FF7CF4578 /* notion-integration_iOS */ = {
+			isa = PBXGroup;
+			children = (
+				130DF90B3C486DA880EA88AE /* Info.plist */,
+				189BD6F7D3F81BEDF491B197 /* notion-integration_iOS.entitlements */,
+			);
+			path = "notion-integration_iOS";
+			sourceTree = "<group>";
+		};
+		EE51216B75FA6CB13E1C27C9 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				60939C25D4E8DAD91DDF6327 /* lib.rs */,
+				FA8B66F4D19DD789D724184F /* main.rs */,
+				546048BBFEDD497ECD11B390 /* web */,
+			);
+			name = src;
+			path = ../../src;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8B95E776CB6E7FBDAEC1B696 /* notion-integration_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0B4A3FA6FCC43B576AD36D33 /* Build configuration list for PBXNativeTarget "notion-integration_iOS" */;
+			buildPhases = (
+				8328DB5B2B9A51FF56925197 /* Build Rust Code */,
+				0E95C1B7D08D7692D36577A4 /* Sources */,
+				5A692DF46F940DF541D38318 /* Resources */,
+				5686A0C8E9302949DD8B29B9 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "notion-integration_iOS";
+			packageProductDependencies = (
+			);
+			productName = "notion-integration_iOS";
+			productReference = 4268075D02CA3623B934F3DE /* notion-integration_iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4578F988F6821EDA69801F36 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+			};
+			buildConfigurationList = 445CAE801E91553F0E3C3796 /* Build configuration list for PBXProject "notion-integration" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 3714F742086533B2BE3107EA;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8B95E776CB6E7FBDAEC1B696 /* notion-integration_iOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5A692DF46F940DF541D38318 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7E07DD8DC97A9C70CB16A21 /* Assets.xcassets in Resources */,
+				C1BA5970F40565557CC21008 /* LaunchScreen.storyboard in Resources */,
+				223289D27A97A9E1B1AD251F /* assets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8328DB5B2B9A51FF56925197 /* Build Rust Code */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Rust Code";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Externals/x86_64/${CONFIGURATION}/libapp.a",
+				"$(SRCROOT)/Externals/arm64/${CONFIGURATION}/libapp.a",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "npm run -- tauri ios xcode-script -v --platform ${PLATFORM_DISPLAY_NAME:?} --sdk-root ${SDKROOT:?} --framework-search-paths \"${FRAMEWORK_SEARCH_PATHS:?}\" --header-search-paths \"${HEADER_SEARCH_PATHS:?}\" --gcc-preprocessor-definitions \"${GCC_PREPROCESSOR_DEFINITIONS:-}\" --configuration ${CONFIGURATION:?} ${FORCE_COLOR} ${ARCHS:?}";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0E95C1B7D08D7692D36577A4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9DB3DBD7BB8F99CE09CC807 /* main.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		01BBA4605DA8647C7BFE9A4D /* release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = release;
+		};
+		867019229A7196C10D27A07A /* debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = debug;
+		};
+		DA171CA8BBA7617899A53644 /* release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ARCHS = (
+					arm64,
+				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "notion-integration_iOS/notion-integration_iOS.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
+				INFOPLIST_FILE = "notion-integration_iOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LIBRARY_SEARCH_PATHS[arch=arm64]" = "$(inherited) $(PROJECT_DIR)/Externals/arm64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				"LIBRARY_SEARCH_PATHS[arch=x86_64]" = "$(inherited) $(PROJECT_DIR)/Externals/x86_64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.max.notion-integration";
+				PRODUCT_NAME = "notion-integration";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = arm64;
+			};
+			name = release;
+		};
+		F27957F7F91FA7C74727BD1B /* debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ARCHS = (
+					arm64,
+				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "notion-integration_iOS/notion-integration_iOS.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
+				INFOPLIST_FILE = "notion-integration_iOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LIBRARY_SEARCH_PATHS[arch=arm64]" = "$(inherited) $(PROJECT_DIR)/Externals/arm64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				"LIBRARY_SEARCH_PATHS[arch=x86_64]" = "$(inherited) $(PROJECT_DIR)/Externals/x86_64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.max.notion-integration";
+				PRODUCT_NAME = "notion-integration";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = arm64;
+			};
+			name = debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0B4A3FA6FCC43B576AD36D33 /* Build configuration list for PBXNativeTarget "notion-integration_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F27957F7F91FA7C74727BD1B /* debug */,
+				DA171CA8BBA7617899A53644 /* release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = debug;
+		};
+		445CAE801E91553F0E3C3796 /* Build configuration list for PBXProject "notion-integration" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				867019229A7196C10D27A07A /* debug */,
+				01BBA4605DA8647C7BFE9A4D /* release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4578F988F6821EDA69801F36 /* Project object */;
+}
