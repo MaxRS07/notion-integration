@@ -1,4 +1,4 @@
-use crate::web::canvas::models::{self, course};
+use crate::web::canvas::models::{self, assignment, course};
 use crate::web::error::AppError;
 use serde::{de::DeserializeOwned, Deserialize};
 use tauri::http::StatusCode;
@@ -57,6 +57,14 @@ impl CanvasClient {
         enrollment: EnrollmentType,
     ) -> Result<Vec<course::Root>, AppError> {
         let endpoint = format!("/api/v1/courses?enrollment_type={}", enrollment.as_str());
+        self.get(&endpoint).await
+    }
+
+    pub async fn assignments_by_course(
+        &self,
+        course_id: String,
+    ) -> Result<Vec<assignment::Root>, AppError> {
+        let endpoint = format!("/api/v1/courses/{}/assignments", course_id);
         self.get(&endpoint).await
     }
 

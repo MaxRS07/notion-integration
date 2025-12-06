@@ -1,4 +1,4 @@
-export type Root = {
+export type Course = {
     id: number;
     sisCourseId: any; // serde_json::Value
     uuid: string;

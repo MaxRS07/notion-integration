@@ -12,15 +12,15 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentView }) => {
         <div className="header-left">
           <div className="app-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.8"/>
-              <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.6"/>
-              <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.6"/>
-              <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4"/>
+              <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.8" />
+              <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.6" />
+              <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.6" />
+              <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4" />
             </svg>
           </div>
-          <h1 className="app-title">Canvas → Notion</h1>
+          <h1 className="app-title">Canvas</h1>
         </div>
-        
+
         <div className="header-tabs">
           <button
             className={`tab-button ${currentView === 'home' ? 'active' : ''}`}
