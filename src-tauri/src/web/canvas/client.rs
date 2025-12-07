@@ -4,7 +4,7 @@ use serde::{de::DeserializeOwned, Deserialize};
 use tauri::http::StatusCode;
 use tauri_plugin_http::reqwest::{header::AUTHORIZATION, Client};
 
-const BASE_URL: &str = "https://northeastern.instructure.com";
+const BASE_URL: &str = "https://northeastern.instructure.com/api/v1";
 
 #[derive(Debug, Deserialize)]
 struct CanvasError {
@@ -52,11 +52,19 @@ impl CanvasClient {
         format!("Bearer {}", self.token)
     }
 
+    pub async fn ping(&self) -> Result<(), AppError> {
+        let endpoint = "/accounts";
+        match self.get::<serde_json::Value>(endpoint).await {
+            Ok(_) => Ok(()),
+            Err(e) => Err(e),
+        }
+    }
+
     pub async fn list_courses(
         &self,
         enrollment: EnrollmentType,
     ) -> Result<Vec<course::Root>, AppError> {
-        let endpoint = format!("/api/v1/courses?enrollment_type={}", enrollment.as_str());
+        let endpoint = format!("/courses?enrollment_type={}", enrollment.as_str());
         self.get(&endpoint).await
     }
 
@@ -64,7 +72,7 @@ impl CanvasClient {
         &self,
         course_id: String,
     ) -> Result<Vec<assignment::Root>, AppError> {
-        let endpoint = format!("/api/v1/courses/{}/assignments", course_id);
+        let endpoint = format!("/courses/{}/assignments", course_id);
         self.get(&endpoint).await
     }
 

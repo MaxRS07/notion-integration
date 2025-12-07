@@ -1,0 +1,74 @@
+/* Canvas Token Section - On Dashboard */
+.canvas-token-section {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.token-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Welcome Setup - Enhanced for form */
+.welcome-setup {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.setup-form {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  margin-bottom: 32px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+.button-large {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 15px;
+}
+
+/* Update welcome features for better spacing */
+.welcome-setup .welcome-features {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  border: 1px solid var(--border-color);
+}
+
+.welcome-setup .welcome-features .feature-item {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+/* Dashboard Grid - Single column when only one card */
+.dashboard-grid.single-card {
+  grid-template-columns: 1fr;
+  max-width: 500px;
+}
+
+/* Responsive adjustments for welcome setup */
+@media (max-width: 768px) {
+  .setup-form {
+    padding: 24px;
+  }
+  
+  .welcome-setup .welcome-features {
+    padding: 20px;
+  }
+}

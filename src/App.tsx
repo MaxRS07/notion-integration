@@ -1,30 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Header } from './components/Header';
-import { Dashboard } from './components/Dashboard';
-import { SettingsPage } from './components/SettingsPage';
-import { StatusCard } from './components/StatusCard';
-import { Settings, SyncStatus } from './types';
+import { Sidebar } from './components/Sidebar';
+import { IntegrationHeader } from './components/IntegrationHeader';
+import { CanvasDashboard } from './components/CanvasDashboard';
+import { CanvasSettings } from './components/CanvasSettings';
+import { CanvasActions } from './components/CanvasActions';
+import { AppSettings } from './components/AppSettings';
+import { Settings, SyncStatus, IntegrationType } from './types';
 import { storage } from './utils/storage';
 import { useSystemTheme } from './utils/useSystemTheme';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'settings'>('home');
+  const theme = useSystemTheme();
+  const [currentIntegration, setCurrentIntegration] = useState<IntegrationType | 'app-settings'>('canvas');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'settings' | 'actions'>('dashboard');
   const [settings, setSettings] = useState<Settings>(() => storage.getSettings());
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({
     lastSync: null,
     status: 'idle',
   });
 
-  const theme = useSystemTheme();
-
   useEffect(() => {
+    // Load settings
     const stored = storage.getSettings();
     setSettings(stored);
-
-    if (!stored.canvasToken || !stored.notionToken) {
-      setCurrentView('settings');
-    }
   }, []);
 
   useEffect(() => {
@@ -40,11 +39,11 @@ function App() {
 
   const handleSync = async () => {
     setSyncStatus({ ...syncStatus, status: 'syncing', message: 'Synchronizing data...' });
-
+    
     try {
       // Simulate sync operation
       await new Promise(resolve => setTimeout(resolve, 2000));
-
+      
       setSyncStatus({
         lastSync: new Date(),
         status: 'success',
@@ -59,25 +58,105 @@ function App() {
     }
   };
 
-  const handleSettingsSaved = () => {
+  const handleAction = async (actionId: string) => {
+    // Simulate action execution
+    console.log('Executing action:', actionId);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleSettingsUpdate = () => {
     const updated = storage.getSettings();
     setSettings(updated);
   };
 
+  const getIntegrationInfo = () => {
+    switch (currentIntegration) {
+      case 'canvas':
+        return {
+          title: 'Canvas LMS',
+          icon: '📚',
+          description: 'Sync courses and assignments to Notion',
+        };
+      default:
+        return {
+          title: 'Integration',
+          icon: '🔗',
+          description: 'Connect your tools to Notion',
+        };
+    }
+  };
+
+  const integrationInfo = getIntegrationInfo();
+
+  // Render App Settings (no tabs, just settings page)
+  if (currentIntegration === 'app-settings') {
+    return (
+      <div className="app">
+        <Sidebar 
+          currentIntegration={currentIntegration}
+          onSelectIntegration={(integration) => {
+            setCurrentIntegration(integration);
+            setCurrentView('dashboard'); // Reset to dashboard when switching
+          }}
+        />
+        
+        <main className="main-content">
+          <div className="content-area full-width">
+            <AppSettings 
+              settings={settings}
+              onSettingsSaved={handleSettingsUpdate}
+            />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Render Integration pages (with tabs)
   return (
     <div className="app">
-      <Header onNavigate={setCurrentView} currentView={currentView} />
-
+      <Sidebar 
+        currentIntegration={currentIntegration}
+        onSelectIntegration={(integration) => {
+          setCurrentIntegration(integration);
+          setCurrentView('dashboard'); // Reset to dashboard when switching
+        }}
+      />
+      
       <main className="main-content">
-        {currentView === 'home' && settings.canvasToken && settings.notionToken && (
-          <StatusCard status={syncStatus} onSync={handleSync} />
-        )}
-
-        {currentView === 'home' ? (
-          <Dashboard settings={settings} />
-        ) : (
-          <SettingsPage onSettingsSaved={handleSettingsSaved} />
-        )}
+        <IntegrationHeader
+          title={integrationInfo.title}
+          icon={integrationInfo.icon}
+          description={integrationInfo.description}
+          onNavigate={setCurrentView}
+          currentView={currentView}
+        />
+        
+        <div className="content-area">
+          {currentIntegration === 'canvas' && (
+            <>
+              {currentView === 'dashboard' && (
+                <CanvasDashboard 
+                  settings={settings}
+                  syncStatus={syncStatus}
+                  onSync={handleSync}
+                />
+              )}
+              {currentView === 'settings' && (
+                <CanvasSettings 
+                  settings={settings}
+                  onSettingsSaved={handleSettingsUpdate}
+                />
+              )}
+              {currentView === 'actions' && (
+                <CanvasActions 
+                  settings={settings}
+                  onAction={handleAction}
+                />
+              )}
+            </>
+          )}
+        </div>
       </main>
     </div>
   );

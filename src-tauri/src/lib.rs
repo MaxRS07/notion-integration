@@ -1,8 +1,11 @@
 pub mod web;
 
-use crate::web::canvas::{
-    client::{CanvasClient, EnrollmentType},
-    models::{assignment, course},
+use crate::web::{
+    canvas::{
+        client::{CanvasClient, EnrollmentType},
+        models::{assignment, course},
+    },
+    notion::{client::NotionClient, models::user},
 };
 
 use std::env;
@@ -27,12 +30,32 @@ async fn get_assignments(courseId: String) -> Result<Vec<assignment::Root>, Stri
         .await
         .map_err(|e| e.to_string())
 }
+#[tauri::command]
+async fn validate_cavas_token(token: String) -> Result<(), String> {
+    CanvasClient::new(token)
+        .ping()
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn validate_notion_token(token: String) -> Result<user::Root, String> {
+    NotionClient::new(token)
+        .list_users()
+        .await
+        .map_err(|e| e.to_string())
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_courses, get_assignments])
+        .invoke_handler(tauri::generate_handler![
+            get_courses,
+            get_assignments,
+            validate_cavas_token,
+            validate_notion_token
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

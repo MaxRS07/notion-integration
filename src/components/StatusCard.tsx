@@ -79,7 +79,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ status, onSync }) => {
               strokeLinejoin="round"
             />
           </svg>
-          Sync Now
+          {!status.lastSync ? 'Initialize' : 'Sync Now'}
         </button>
       </div>
     </div>

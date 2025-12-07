@@ -11,3 +11,14 @@ export interface SyncStatus {
   status: 'idle' | 'syncing' | 'error' | 'success';
   message?: string;
 }
+
+export type IntegrationType = 'canvas' | 'google-calendar' | 'slack' | 'github';
+
+export interface Integration {
+  id: IntegrationType;
+  name: string;
+  icon: string;
+  description: string;
+  isActive: boolean;
+  color: string;
+}
