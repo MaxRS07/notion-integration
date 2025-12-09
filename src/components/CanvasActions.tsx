@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Settings } from '../types';
 import { getPageList } from '../utils/notion';
 import { Result } from '../models/notion/page_query';
-import { DataTypeSelector } from './wizard/DataTypeSelector';
 import { DestinationSelector, NotionDestination } from './wizard/DestinationSelector';
 import { FieldMappingForm } from './wizard/FieldMappingForm';
 
@@ -126,13 +125,6 @@ export const CanvasActions: React.FC<CanvasActionsProps> = ({ settings, onAction
     <div className="integration-actions">
       <div className="sync-wizard">
         {step === 1 && (
-          <DataTypeSelector
-            selectedDataType={selectedDataType}
-            onSelectDataType={handleSelectDataType}
-          />
-        )}
-
-        {step === 2 && (
           <DestinationSelector
             selectedDataType={selectedDataType}
             selectedDestination={selectedDestination}
@@ -160,7 +152,7 @@ export const CanvasActions: React.FC<CanvasActionsProps> = ({ settings, onAction
           />
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <FieldMappingForm
             databaseColumns={databaseColumns}
             templateValues={templateValues}

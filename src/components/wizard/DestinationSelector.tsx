@@ -1,71 +1,65 @@
 import React from 'react';
 import { Result } from '../../models/notion/page_query';
-import { SearchDropdown } from './SearchDropdown';
+import DropdownSelector from './DropDownSelector';
+import DestinationPreview from './SelectionPreview';
 
 interface DatabaseColumn {
   id: string;
   name: string;
-  type: 'title' | 'text' | 'number' | 'select' | 'multi_select' | 'date' | 'checkbox' | 'url' | 'email' | 'phone';
+  description: string;
+  type:
+  | 'title'
+  | 'text'
+  | 'number'
+  | 'select'
+  | 'multi_select'
+  | 'date'
+  | 'checkbox'
+  | 'url'
+  | 'email'
+  | 'phone';
 }
 
-class NotionDestination {
-  data: Result
+export class NotionDestination {
+  data: Result;
 
   constructor(result: Result) {
-    this.data = result
+    this.data = result;
   }
+
   getId(): string {
-    return this.data.id ?? ""
+    return this.data.id ?? '';
   }
+
   isDatasource(): boolean {
-    return !this.isPage()
+    return !this.isPage();
   }
+
   isPage(): boolean {
-    return this.data.object === "page";
+    return this.data.object === 'page';
   }
+
   getName(): string {
-    return this.isPage() ?
-      this.data.properties.title?.title?.[0]?.plain_text ?? "(no title)" :
-      this.data.title?.map(t => t.plain_text).join('') ?? "_";
+    return this.isPage()
+      ? this.data.properties.title?.title?.[0]?.plain_text ?? '(no title)'
+      : this.data.title?.map(t => t.plain_text).join('') ?? '_';
   }
+
   getDisplayType(): string {
-    return this.isPage() ? "Page" : "Data Source"
+    return this.isPage() ? 'Page' : 'Data Source';
   }
+
   getColumns(): DatabaseColumn[] {
-    var objects: DatabaseColumn[] = [];
-    if (this.isDatasource()) {
-      for (const [k, v] of Object.entries(this.data.properties)) {
-        objects.push({ name: k, id: "", type: 'text' });
-      }
-    }
-    return objects;
+    if (!this.isDatasource()) return [];
+    return Object.entries(this.data.properties).map(([k, v]) => {
+      const o = v as DatabaseColumn;
+      o.name = k;
+      return o;
+    });
   }
 }
 
 type CanvasDataType = 'courses' | 'assignments' | 'announcements' | 'grades' | '';
-
-interface DestinationSelectorProps {
-  selectedDataType: CanvasDataType;
-  selectedDestination: NotionDestination | null;
-  searchQuery: string;
-  showDropdown: boolean;
-  notionDestinations: NotionDestination[];
-  selectedActionType: string;
-  actionSearchQuery: string;
-  showActionDropdown: boolean;
-  onSearchChange: (value: string) => void;
-  onSelectDestination: (destination: NotionDestination) => void;
-  onFocus: () => void;
-  onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
-  onClearDestination: () => void;
-  onActionSearchChange: (value: string) => void;
-  onSelectActionType: (actionId: string) => void;
-  onActionFocus: () => void;
-  onActionBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
-  onClearActionType: () => void;
-  onBack: () => void;
-  onNext: () => void;
-}
 
 const canvasDataTypes = [
   { id: 'courses', name: 'Courses', icon: '📚', description: 'Import your enrolled courses from Canvas' },
@@ -82,193 +76,147 @@ const actionTypes = [
   { id: 'add_database_entry', name: 'Add Database Entry', description: 'Add new rows to database' },
 ];
 
-export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
-  selectedDataType,
-  selectedDestination,
-  searchQuery,
-  showDropdown,
-  notionDestinations,
-  selectedActionType,
-  actionSearchQuery,
-  showActionDropdown,
-  onSearchChange,
-  onSelectDestination,
-  onFocus,
-  onBlur,
-  onClearDestination,
-  onActionSearchChange,
-  onSelectActionType,
-  onActionFocus,
-  onActionBlur,
-  onClearActionType,
-  onBack,
-  onNext,
-}) => {
-  const nameSort = (a: NotionDestination, b: NotionDestination): number => {
-    const aNoTitle = a.getName() === "(no title)";
-    const bNoTitle = b.getName() === "(no title)";
+interface DestinationSelectorProps {
+  selectedDestination: NotionDestination | null;
+  searchQuery: string;
+  showDropdown: boolean;
+  notionDestinations: NotionDestination[];
+  selectedActionType: string;
+  actionSearchQuery: string;
+  showActionDropdown: boolean;
+  selectedDataType: CanvasDataType;
+  dataSearchQuery: string;
+  showDataDropdown: boolean;
+  onSearchChange: (value: string) => void;
+  onSelectDestination: (destination: NotionDestination) => void;
+  onFocus: () => void;
+  onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
+  onClearDestination: () => void;
+  onActionSearchChange: (value: string) => void;
+  onSelectActionType: (actionId: string) => void;
+  onActionFocus: () => void;
+  onActionBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
+  onClearActionType: () => void;
+  onDataSearchChange: (value: string) => void;
+  onSelectDataType: (actionId: string) => void;
+  onDataFocus: () => void;
+  onDataBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
+  onClearDataType: () => void;
+  onBack: () => void;
+  onNext: () => void;
+}
 
+export const DestinationSelector: React.FC<DestinationSelectorProps> = props => {
+  const sortedDestinations = [...props.notionDestinations].sort((a, b) => {
+    const aNoTitle = a.getName() === '(no title)';
+    const bNoTitle = b.getName() === '(no title)';
     if (aNoTitle && !bNoTitle) return 1;
     if (!aNoTitle && bNoTitle) return -1;
-    if (aNoTitle && bNoTitle) return 0;
-
     return a.getName().localeCompare(b.getName());
-  };
+  });
 
-  const filteredPages = notionDestinations
-    .filter(dest => dest.getName().toLowerCase().includes(searchQuery.toLowerCase()));
-  filteredPages.sort(nameSort);
-
-  const filteredActionTypes = actionTypes.filter(action =>
-    action.name.toLowerCase().includes(actionSearchQuery.toLowerCase())
+  const filteredDestinations = sortedDestinations.filter(dest =>
+    dest.getName().toLowerCase().includes(props.searchQuery.toLowerCase())
   );
 
-  const getSelectedActionName = () => {
-    const action = actionTypes.find(a => a.id === selectedActionType);
-    return action?.name || '';
-  };
-
-  const destinationOptions = filteredPages.map(dest => ({
-    id: dest.getId(),
-    name: dest.getName(),
-    description: dest.getDisplayType(),
-  }));
+  const filteredActionTypes = actionTypes.filter(action =>
+    action.name.toLowerCase().includes(props.actionSearchQuery.toLowerCase())
+  );
 
   return (
     <div className="wizard-step">
       <div className="step-header">
-        <h2 className="step-title">
-          Where should we add your {canvasDataTypes.find(t => t.id === selectedDataType)?.name}?
-        </h2>
-        <p className="step-description">Search for a Notion page or database</p>
+        <h2 className="step-title">Where?</h2>
+        <p className="step-description">Choose action source and target</p>
       </div>
 
-      <div className="destination-selector" style={{ maxWidth: '900px' }}>
-        <div style={{ marginTop: '24px' }}>
-          <SearchDropdown
-            searchQuery={actionSearchQuery}
-            selectedValue={selectedActionType}
-            showDropdown={showActionDropdown}
-            placeholder="Select action type..."
-            icon="⚡"
-            label="Action Type"
-            options={filteredActionTypes}
-            onSearchChange={(value) => {
-              onActionSearchChange(value);
-              onClearActionType();
-              onActionFocus();
-            }}
-            onSelect={onSelectActionType}
-            onFocus={onActionFocus}
-            onBlur={onActionBlur}
-            onClear={() => {
-              onClearActionType();
-              onActionFocus();
-            }}
-            getSelectedName={getSelectedActionName}
-          />
-        </div>
-        <SearchDropdown
-          searchQuery={searchQuery}
-          selectedValue={selectedDestination?.getId() || ''}
-          showDropdown={showDropdown}
+      <div className="destination-selector" style={{ maxWidth: '900px', marginTop: '24px' }}>
+        <DropdownSelector
+          searchQuery={props.dataSearchQuery}
+          selectedValue={props.selectedDataType}
+          showDropdown={props.showDataDropdown}
+          placeholder="Select data to get from Canvas..."
+          label="Canvas Data Type"
+          options={canvasDataTypes}
+          getOptionId={o => o.id}
+          getOptionName={o => o.name}
+          onSearchChange={value => { props.onDataSearchChange(value); props.onClearDataType(); props.onDataFocus(); }}
+          onSelect={id => props.onSelectDataType(id as CanvasDataType)}
+          onFocus={props.onDataFocus}
+          onBlur={props.onDataBlur}
+          onClear={() => { props.onClearDataType(); props.onDataFocus(); }}
+        />
+
+        <DropdownSelector
+          searchQuery={props.actionSearchQuery}
+          selectedValue={props.selectedActionType}
+          showDropdown={props.showActionDropdown}
+          placeholder="Select action type..."
+          label="Action Type"
+          options={filteredActionTypes}
+          getOptionId={o => o.id}
+          getOptionName={o => o.name}
+          onSearchChange={value => { props.onActionSearchChange(value); props.onClearActionType(); props.onActionFocus(); }}
+          onSelect={props.onSelectActionType}
+          onFocus={props.onActionFocus}
+          onBlur={props.onActionBlur}
+          onClear={() => { props.onClearActionType(); props.onActionFocus(); }}
+        />
+
+        <DropdownSelector
+          searchQuery={props.searchQuery}
+          selectedValue={props.selectedDestination?.getId() || ''}
+          showDropdown={props.showDropdown}
           placeholder="Search pages and databases..."
-          icon="🔍"
           label="Notion Destination"
-          options={destinationOptions}
-          onSearchChange={(value) => {
-            onSearchChange(value);
-            onClearDestination();
-            onFocus();
+          options={filteredDestinations.map(dest => ({
+            id: dest.getId(),
+            name: dest.getName(),
+            description: dest.getDisplayType(),
+          }))}
+          getOptionId={o => o.id}
+          getOptionName={o => o.name}
+          onSearchChange={value => { props.onSearchChange(value); props.onClearDestination(); props.onFocus(); }}
+          onSelect={id => {
+            const dest = props.notionDestinations.find(d => d.getId() === id);
+            if (dest) props.onSelectDestination(dest);
           }}
-          onSelect={(id) => {
-            const dest = notionDestinations.find(d => d.getId() === id);
-            if (dest) onSelectDestination(dest);
-          }}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          onClear={() => {
-            onClearDestination();
-            onFocus();
-          }}
-          getSelectedName={() => selectedDestination?.getName() || ''}
-          showCreateOptions={true}
+          onFocus={props.onFocus}
+          onBlur={props.onBlur}
+          onClear={() => { props.onClearDestination(); props.onFocus(); }}
+          showCreateOptions
         />
 
         <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-          <div className="selected-destination" style={{ flex: 1, opacity: selectedActionType ? 1 : 0.5 }}>
-            <div className="destination-preview">
-              {selectedActionType ? (
-                <>
-                  <div className="destination-info">
-                    <div className="destination-name">{getSelectedActionName()}</div>
-                    <div className="destination-type">{filteredActionTypes.find(o => o.id === selectedActionType)?.description}</div>
-                  </div>
-                  <button
-                    className="button-icon"
-                    style={{ color: "#fff" }}
-                    onClick={() => {
-                      onClearActionType();
-                    }}
-                  >
-                    ✕
-                  </button>
-                </>
-              ) : (
-                <div className="destination-info">
-                  <div className="destination-name" style={{ color: '#888' }}>No action selected</div>
-                  <div className="destination-type">Choose an action type above</div>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="selected-destination" style={{ flex: 1, opacity: selectedDestination ? 1 : 0.5 }}>
-            <div className="destination-preview">
-              {selectedDestination ? (
-                <>
-                  <div className="destination-info">
-                    <div className="destination-name">{selectedDestination.getName()}</div>
-                    <div className="destination-type">{selectedDestination.getDisplayType()}</div>
-                  </div>
-                  <button
-                    className="button-icon"
-                    style={{ color: "#fff" }}
-                    onClick={() => {
-                      onClearDestination();
-                    }}
-                  >
-                    ✕
-                  </button>
-                </>
-              ) : (
-                <div className="destination-info">
-                  <div className="destination-name" style={{ color: '#888' }}>No destination selected</div>
-                  <div className="destination-type">Search for a page or database above</div>
-                </div>
-              )}
-            </div>
-          </div>
+          <DestinationPreview
+            name={actionTypes.find(a => a.id === props.selectedActionType)?.name || ''}
+            description={actionTypes.find(a => a.id === props.selectedActionType)?.description || ''}
+            onClear={props.onClearActionType}
+            isActive={!!props.selectedActionType}
+            placeholderName="No action selected"
+            placeholderDescription="Choose an action type above"
+          />
+          <DestinationPreview
+            name={props.selectedDestination?.getName() || ''}
+            description={props.selectedDestination?.getDisplayType() || ''}
+            onClear={props.onClearDestination}
+            isActive={!!props.selectedDestination}
+            placeholderName="No destination selected"
+            placeholderDescription="Search for a page or database above"
+          />
         </div>
       </div>
 
-
       <div className="wizard-actions">
-        <button
-          className="button button-primary button-large"
-          onClick={onBack}
-        >
-          Go Back
-        </button>
+        <button className="button button-primary button-large" onClick={props.onBack}>Go Back</button>
         <button
           className="button button-primary accent button-large"
-          onClick={onNext}
-          disabled={!selectedDestination || !selectedActionType}
+          onClick={props.onNext}
+          disabled={!props.selectedDestination || !props.selectedActionType}
         >
           Next
         </button>
       </div>
-    </div >
+    </div>
   );
 };
-
-export { NotionDestination };

@@ -5,8 +5,8 @@ interface SearchDropdownProps {
   selectedValue: string;
   showDropdown: boolean;
   placeholder: string;
-  icon: string;
-  label: string;
+  icon?: string;
+  label?: string;
   options: Array<{ id: string; name: string; description: string }>;
   onSearchChange: (value: string) => void;
   onSelect: (id: string) => void;
