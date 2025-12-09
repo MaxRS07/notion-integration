@@ -1,119 +1,185 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Settings } from '../types';
+import { getPageList } from '../utils/notion';
+import _, { Result } from '../models/notion/page_query';
 
 interface CanvasActionsProps {
   settings: Settings;
   onAction: (action: string) => Promise<void>;
 }
 
-interface Automation {
+type CanvasDataType = 'courses' | 'assignments' | 'announcements' | 'grades' | '';
+
+class NotionDestination {
+  data: Result
+
+  constructor(result: Result) {
+    this.data = result
+  }
+  getId(): string {
+    return this.data.id ?? ""
+  }
+  isDatasource(): boolean {
+    return !this.isPage()
+  }
+  isPage(): boolean {
+    return this.data.object === "page";
+  }
+  getName(): string {
+    return this.isPage() ?
+      this.data.properties.title?.title?.[0]?.plain_text ?? "(no title)" :
+      this.data.title?.map(t => t.plain_text).join('') ?? "_";
+  }
+  getDisplayType(): string {
+    return this.isPage() ? "Page" : "Data Source"
+  }
+  getColumns(): DatabaseColumn[] {
+    var objects: DatabaseColumn[] = [];
+    if (this.isDatasource()) {
+      for (const [k, v] of Object.entries(this.data.properties)) {
+        objects.push({ name: k, id: "", type: 'text' });
+      }
+    }
+    return objects;
+  }
+}
+
+interface DatabaseColumn {
   id: string;
   name: string;
-  trigger: string;
-  actions: AutomationAction[];
-  enabled: boolean;
+  type: 'title' | 'text' | 'number' | 'select' | 'multi_select' | 'date' | 'checkbox' | 'url' | 'email' | 'phone';
 }
-
-interface AutomationAction {
-  type: string;
-  config: Record<string, any>;
-}
-
 export const CanvasActions: React.FC<CanvasActionsProps> = ({ settings, onAction }) => {
-  const [automations, setAutomations] = useState<Automation[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingAutomation, setEditingAutomation] = useState<Automation | null>(null);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [selectedDataType, setSelectedDataType] = useState<CanvasDataType>('');
+  const [selectedDestination, setSelectedDestination] = useState<NotionDestination | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  // Builder state
-  const [automationName, setAutomationName] = useState('');
-  const [selectedTrigger, setSelectedTrigger] = useState('');
-  const [automationActions, setAutomationActions] = useState<AutomationAction[]>([]);
+  const [notionDestinations, setNotionDestinations] = useState<(NotionDestination)[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const [databaseColumns, setDatabaseColumns] = useState<DatabaseColumn[]>([]);
+
+  const [templateValues, setTemplateValues] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    handlePages();
+  }, []);
+
+  const nameSort = (a: NotionDestination, b: NotionDestination): number => {
+    const aNoTitle = a.getName() === "(no title)";
+    const bNoTitle = b.getName() === "(no title)";
+
+    if (aNoTitle && !bNoTitle) return 1;
+    if (!aNoTitle && bNoTitle) return -1;
+    if (aNoTitle && bNoTitle) return 0;
+
+    return a.getName().localeCompare(b.getName());
+  }
+
+  const handlePages = async () => {
+    const pages = await getPageList(settings.notionToken, "", 10);
+
+    if (pages) {
+      const destinations: NotionDestination[] = pages.results
+        .filter(p => p.id && p.id !== "0")
+        .map(p => new NotionDestination(p));
+      setNotionDestinations(destinations);
+    } else {
+      setNotionDestinations([]);
+    }
+  };
 
   const hasTokens = settings.canvasToken && settings.notionToken;
 
-  const actionTypes = [
-    {
-      id: 'create-page',
-      name: 'Create Notion Page',
-      fields: [
-        { name: 'database', label: 'Target Database', type: 'select', options: ['Courses', 'Assignments', 'Tasks'] },
-        { name: 'title', label: 'Page Title', type: 'text', placeholder: 'e.g., {{course.name}}' },
-      ]
-    },
-    {
-      id: 'update-page',
-      name: 'Update Notion Page',
-      fields: [
-        { name: 'database', label: 'Target Database', type: 'select', options: ['Courses', 'Assignments', 'Tasks'] },
-        { name: 'property', label: 'Property to Update', type: 'text' },
-        { name: 'value', label: 'New Value', type: 'text' },
-      ]
-    },
-    {
-      id: 'add-property',
-      name: 'Add Database Property',
-      fields: [
-        { name: 'database', label: 'Target Database', type: 'select', options: ['Courses', 'Assignments', 'Tasks'] },
-        { name: 'propertyName', label: 'Property Name', type: 'text' },
-        { name: 'propertyType', label: 'Property Type', type: 'select', options: ['Text', 'Number', 'Date', 'Select', 'Multi-select', 'Checkbox'] },
-      ]
-    },
-    {
-      id: 'send-notification',
-      name: 'Send Notification',
-      fields: [
-        { name: 'message', label: 'Message', type: 'textarea', placeholder: 'Assignment "{{assignment.name}}" is due soon!' },
-      ]
-    },
+  const canvasDataTypes = [
+    { id: 'courses' as CanvasDataType, name: 'Courses', icon: '📚', description: 'Import your enrolled courses from Canvas' },
+    { id: 'assignments' as CanvasDataType, name: 'Assignments', icon: '✅', description: 'Sync assignments and due dates' },
+    { id: 'announcements' as CanvasDataType, name: 'Announcements', icon: '📢', description: 'Get course announcements' },
+    { id: 'grades' as CanvasDataType, name: 'Grades', icon: '📊', description: 'Track your grades and scores' },
   ];
 
-  const handleStartCreating = () => {
-    setIsCreating(true);
-    setEditingAutomation(null);
-    setAutomationName('');
-    setSelectedTrigger('');
-    setAutomationActions([]);
+  const filteredPages = notionDestinations
+    .filter(dest => dest.getName().toLowerCase().includes(searchQuery.toLowerCase()))
+  filteredPages.sort(nameSort);
+
+  const handleSelectDataType = (type: CanvasDataType) => {
+    setSelectedDataType(type);
+    setStep(2);
   };
 
-  const handleAddAction = () => {
-    setAutomationActions([...automationActions, { type: '', config: {} }]);
+  const handleBack = () => {
+    setStep(1);
+    setSelectedDestination(null);
+    setSearchQuery('');
   };
 
-  const handleRemoveAction = (index: number) => {
-    setAutomationActions(automationActions.filter((_, i) => i !== index));
+  const handleSelectDestination = (destination: NotionDestination) => {
+    setSelectedDestination(destination);
+    setShowDropdown(false);
   };
 
-  const handleUpdateAction = (index: number, type: string, config: Record<string, any>) => {
-    const updated = [...automationActions];
-    updated[index] = { type, config };
-    setAutomationActions(updated);
+  const handleContinueToMapping = () => {
+    if (selectedDestination?.isDatasource()) {
+      setDatabaseColumns(selectedDestination.getColumns());
+      setStep(3);
+    } else {
+      handleSync();
+    }
   };
 
-  const handleSaveAutomation = () => {
-    const newAutomation: Automation = {
-      id: Date.now().toString(),
-      name: automationName,
-      trigger: selectedTrigger,
-      actions: automationActions,
-      enabled: true,
+  const getCanvasFieldOptions = (dataType: CanvasDataType) => {
+    const baseOptions = [
+      { value: '', label: 'Select field...' },
+      { value: 'static:', label: 'Enter custom value' },
+    ];
+
+    const fieldsByType: Record<string, Array<{ value: string, label: string }>> = {
+      courses: [
+        ...baseOptions,
+        { value: 'course.name', label: 'Course Name' },
+        { value: 'course.code', label: 'Course Code' },
+        { value: 'course.term', label: 'Term' },
+        { value: 'course.start_date', label: 'Start Date' },
+        { value: 'course.end_date', label: 'End Date' },
+      ],
+      assignments: [
+        ...baseOptions,
+        { value: 'assignment.name', label: 'Assignment Name' },
+        { value: 'assignment.due_date', label: 'Due Date' },
+        { value: 'assignment.points', label: 'Points Possible' },
+        { value: 'assignment.description', label: 'Description' },
+        { value: 'assignment.url', label: 'Assignment URL' },
+        { value: 'assignment.course', label: 'Course Name' },
+      ],
+      announcements: [
+        ...baseOptions,
+        { value: 'announcement.title', label: 'Title' },
+        { value: 'announcement.message', label: 'Message' },
+        { value: 'announcement.posted_at', label: 'Posted Date' },
+        { value: 'announcement.author', label: 'Author' },
+      ],
+      grades: [
+        ...baseOptions,
+        { value: 'grade.assignment', label: 'Assignment' },
+        { value: 'grade.score', label: 'Score' },
+        { value: 'grade.grade', label: 'Letter Grade' },
+        { value: 'grade.submitted_at', label: 'Submitted Date' },
+      ],
     };
 
-    setAutomations([...automations, newAutomation]);
-    setIsCreating(false);
-    setAutomationName('');
-    setSelectedTrigger('');
-    setAutomationActions([]);
+    return fieldsByType[dataType] || baseOptions;
   };
 
-  const handleToggleAutomation = (id: string) => {
-    setAutomations(automations.map(a =>
-      a.id === id ? { ...a, enabled: !a.enabled } : a
-    ));
+  const handleSync = async () => {
+    if (!selectedDataType || !selectedDestination) return;
+    await onAction(`sync-${selectedDataType}-to-${selectedDestination.getId()}`);
   };
 
-  const handleDeleteAutomation = (id: string) => {
-    if (confirm('Delete this automation?')) {
-      setAutomations(automations.filter(a => a.id !== id));
+  const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!searchRef.current?.contains(e.relatedTarget as Node)) {
+      setShowDropdown(false);
     }
   };
 
@@ -124,135 +190,8 @@ export const CanvasActions: React.FC<CanvasActionsProps> = ({ settings, onAction
           <div className="empty-icon">⚠️</div>
           <h3 className="empty-title">Configuration Required</h3>
           <p className="empty-description">
-            Please configure your Canvas and Notion tokens in Settings before creating automations.
+            Please configure your Canvas and Notion tokens in Settings before syncing data.
           </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isCreating) {
-    return (
-      <div className="integration-actions">
-        <div className="automation-builder">
-          <div className="builder-header">
-            <h2 className="builder-title">Create Automation</h2>
-            <button className="button button-secondary" onClick={() => setIsCreating(false)}>
-              Cancel
-            </button>
-          </div>
-
-          <div className="builder-section">
-            <label className="builder-label">Automation Name</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="e.g., Create Notion page for new assignments"
-              value={automationName}
-              onChange={(e) => setAutomationName(e.target.value)}
-            />
-          </div>
-          <div className="builder-section">
-            <div className="section-header">
-              <div>
-                <label className="builder-label">Actions</label>
-                <p className="builder-description">What should happen when triggered?</p>
-              </div>
-              <button className="button button-secondary" onClick={handleAddAction}>
-                + Add Action
-              </button>
-            </div>
-
-            <div className="actions-list">
-              {automationActions.map((action, index) => (
-                <div key={index} className="action-builder-card">
-                  <div className="action-builder-header">
-                    <span className="action-number">Action {index + 1}</span>
-                    <button
-                      className="button-icon"
-                      onClick={() => handleRemoveAction(index)}
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Action Type</label>
-                    <select
-                      className="form-select"
-                      value={action.type}
-                      onChange={(e) => {
-                        const type = e.target.value;
-                        handleUpdateAction(index, type, {});
-                      }}
-                    >
-                      <option value="">Select action type...</option>
-                      {actionTypes.map(type => (
-                        <option key={type.id} value={type.id}>{type.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {action.type && actionTypes.find(t => t.id === action.type)?.fields.map(field => (
-                    <div key={field.name} className="form-group">
-                      <label className="form-label">{field.label}</label>
-                      {field.type === 'select' ? (
-                        <select
-                          className="form-select"
-                          value={action.config[field.name] || ''}
-                          onChange={(e) => {
-                            const newConfig = { ...action.config, [field.name]: e.target.value };
-                            handleUpdateAction(index, action.type, newConfig);
-                          }}
-                        >
-                          <option value="">Select...</option>
-                          {field.options?.map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      ) : field.type === 'textarea' ? (
-                        <textarea
-                          className="form-textarea"
-                          value={action.config[field.name] || ''}
-                          onChange={(e) => {
-                            const newConfig = { ...action.config, [field.name]: e.target.value };
-                            handleUpdateAction(index, action.type, newConfig);
-                          }}
-                          rows={3}
-                        />
-                      ) : (
-                        <input
-                          type="text"
-                          className="form-input"
-                          value={action.config[field.name] || ''}
-                          onChange={(e) => {
-                            const newConfig = { ...action.config, [field.name]: e.target.value };
-                            handleUpdateAction(index, action.type, newConfig);
-                          }}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ))}
-
-              {automationActions.length === 0 && (
-                <div className="empty-actions">
-                  Click "Add Action" to define what happens when this automation triggers
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="builder-footer">
-            <button
-              className="button button-primary button-large"
-              onClick={handleSaveAutomation}
-              disabled={!automationName || !selectedTrigger || automationActions.length === 0}
-            >
-              Create Automation
-            </button>
-          </div>
         </div>
       </div>
     );
@@ -260,76 +199,237 @@ export const CanvasActions: React.FC<CanvasActionsProps> = ({ settings, onAction
 
   return (
     <div className="integration-actions">
-      <div className="automations-container">
-        <div className="automations-header">
-          <div>
-            <h2 className="automations-title">Automations</h2>
-            <p className="automations-description">
-              Create automated workflows between Canvas and Notion
-            </p>
-          </div>
-          <button className="button button-primary" onClick={handleStartCreating}>
-            + New Automation
-          </button>
-        </div>
-
-        {automations.length === 0 ? (
-          <div className="automations-empty">
-            <div className="empty-icon">⚡</div>
-            <h3 className="empty-title">No Automations Yet</h3>
-            <p className="empty-description">
-              Create your first automation to automatically sync data between Canvas and Notion
-            </p>
-            <button className="button button-primary" onClick={handleStartCreating}>
-              Create Your First Automation
-            </button>
-          </div>
-        ) : (
-          <div className="automations-list">
-            {automations.map(automation => {
-              return (
-                <div key={automation.id} className="automation-card">
-                  <div className="automation-header">
-                    <div className="automation-info">
-                      <h3 className="automation-name">{automation.name}</h3>
-                    </div>
-                    <div className="automation-controls">
-                      <label className="toggle-switch">
-                        <input
-                          type="checkbox"
-                          checked={automation.enabled}
-                          onChange={() => handleToggleAutomation(automation.id)}
-                        />
-                        <span className="toggle-slider"></span>
-                      </label>
-                      <button
-                        className="button-icon button-danger"
-                        onClick={() => handleDeleteAutomation(automation.id)}
-                      >
-                        🗑️
-                      </button>
-                    </div>
+      <div className="sync-wizard">
+        {/* Step 1 */}
+        {step === 1 && (
+          <div className="wizard-step">
+            <div className="step-header">
+              <h2 className="step-title">What would you like to sync from Canvas?</h2>
+              <p className="step-description">Select the type of data you want to import into Notion</p>
+            </div>
+            <div className="data-type-grid">
+              {canvasDataTypes.map(dataType => (
+                <button
+                  key={dataType.id}
+                  className={`data-type-card ${selectedDataType === dataType.id ? 'selected' : ''}`}
+                  onClick={() => handleSelectDataType(dataType.id)}
+                >
+                  <div className="data-type-icon">{dataType.icon}</div>
+                  <div className="data-type-info">
+                    <h3 className="data-type-name">{dataType.name}</h3>
+                    <p className="data-type-description">{dataType.description}</p>
                   </div>
-                  <div className="automation-actions">
-                    <div className="actions-count">
-                      {automation.actions.length} action{automation.actions.length !== 1 ? 's' : ''}
-                    </div>
-                    <div className="actions-preview">
-                      {automation.actions.map((action, idx) => {
-                        const actionType = actionTypes.find(t => t.id === action.type);
-                        return (
-                          <div key={idx} className="action-preview">
-                            {idx + 1}. {actionType?.name || action.type}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                  <div className="data-type-arrow">→</div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Step 2 */}
+        {step === 2 && (
+          <div className="wizard-step">
+            <div className="step-header">
+              <h2 className="step-title">
+                Where should we add your {canvasDataTypes.find(t => t.id === selectedDataType)?.name}?
+              </h2>
+              <p className="step-description">Search for a Notion page or database</p>
+            </div>
+
+            <div className="destination-selector" ref={searchRef} tabIndex={0} onBlur={handleBlur}>
+              <div className="search-container">
+                <label className="form-label">Notion Destination</label>
+                <div className="search-input-wrapper">
+                  <input
+                    type="text"
+                    className="form-input search-input"
+                    placeholder="Search pages and databases..."
+                    value={selectedDestination ? selectedDestination.getName() : searchQuery}
+                    onChange={e => {
+                      setSearchQuery(e.target.value);
+                      setSelectedDestination(null);
+                      setShowDropdown(true);
+                    }}
+                    onFocus={() => setShowDropdown(true)}
+                  />
+                  <span className="search-icon">🔍</span>
+                </div>
+
+                {showDropdown && !selectedDestination && (
+                  <div className="search-dropdown">
+                    {searchQuery.length === 0 &&
+                      <div className="dropdown-section">
+                        <div className="dropdown-heading">Create New</div>
+                        <button className='dropdown-item'>
+                          <div className="dropdown-info">
+                            <div className="dropdown-name">New Page</div>
+                            <div className="dropdown-type">Create a new page as the destination</div>
+                          </div>
+                        </button>
+                        <button className='dropdown-item'>
+                          <div className="dropdown-info">
+                            <div className="dropdown-name">New Datasource</div>
+                            <div className="dropdown-type">Create a new datasource as the destination</div>
+                          </div>
+                        </button>
+                      </div>
+                    }
+                    {filteredPages.length > 0 && (
+                      <div className="dropdown-section">
+                        <div className="dropdown-heading">Pages</div>
+                        {filteredPages.map(dest => (
+                          <button
+                            key={dest.getId()}
+                            className={`dropdown-item`}
+                            onClick={() => handleSelectDestination(dest)}
+                          >
+                            <div className="dropdown-info">
+                              <div className="dropdown-name">{dest.getName()}</div>
+                              <div className="dropdown-type">{dest.getDisplayType()}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {filteredPages.length === 0 && (
+                      <div className="dropdown-empty">
+                        No results found for "{searchQuery}"
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {selectedDestination && (
+                <div className="selected-destination">
+                  <div className="destination-preview">
+                    <div className="destination-info">
+                      <div className="destination-name">{selectedDestination.getName()}</div>
+                      <div className="destination-type">{selectedDestination.getDisplayType()}</div>
+                    </div>
+                    <button
+                      className="button-icon"
+                      style={{ color: "#fff" }}
+                      onClick={() => {
+                        setSelectedDestination(null);
+                        setShowDropdown(true);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="sync-info-box">
+                <div className="info-icon">ℹ️</div>
+                <div className="info-content">
+                  <div className="info-text">
+                    Your {canvasDataTypes.find(t => t.id === selectedDataType)?.name.toLowerCase()} will be
+                    added to <strong>{selectedDestination?.getName() || 'the selected destination'}</strong>.
+                    {selectedDestination?.isDatasource() && ' New entries will be created for each item.'}
+                    {selectedDestination?.isPage() && ' Content will be added as child pages.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="wizard-actions">
+              <button
+                className="button button-primary button-large"
+                onClick={handleBack}
+              >
+                Go Back
+              </button>
+              <button
+                className="button button-primary accent button-large"
+                onClick={() => handleContinueToMapping()}
+                disabled={!selectedDestination}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+        { /* Step 3 */}
+        {step === 3 && (
+          <div className="wizard-step">
+
+            <div className="step-header">
+              <h2 className="step-title">Map Canvas fields to your Notion database</h2>
+              <p className="step-description">
+                Enter text or use variables like <code>{`{course.name}`}</code>,
+                <code>{`{assignment.due_at}`}</code>, etc.
+              </p>
+            </div>
+
+            {/* FORM */}
+            <form className="mapping-form">
+
+              {databaseColumns.map((col) => (
+                <div key={col.id} className="mapping-field">
+
+                  {/* Label */}
+                  <label className="mapping-label">
+                    {col.name}
+                    <span className="mapping-type-tag">{col.type}</span>
+                  </label>
+
+                  {/* Template input */}
+                  <textarea
+                    className="mapping-input"
+                    rows={2}
+                    placeholder={`Enter value... e.g. {assignment.name}`}
+                    value={templateValues[col.id] || ""}
+                    onChange={(e) =>
+                      setTemplateValues((prev) => ({
+                        ...prev,
+                        [col.id]: e.target.value,
+                      }))
+                    }
+                  />
+
+                  {/* Optional: Variable picker */}
+                  {/* <div className="mapping-vars">
+                    {canvasFields.map((field) => (
+                      <button
+                        key={field}
+                        type="button"
+                        className="var-button"
+                        onClick={() => {
+                          setTemplateValues((prev) => ({
+                            ...prev,
+                            [col.id]: (prev[col.id] || "") + `{${field}}`,
+                          }));
+                        }}
+                      >
+                        {`{${field}}`}
+                      </button>
+                    ))}
+                  </div> */}
+
+                </div>
+              ))}
+
+            </form>
+
+            {/* BUTTONS */}
+            <div className="wizard-actions">
+              <button className="button button-primary button-large" onClick={() => setStep(2)}>
+                Back
+              </button>
+
+              <button
+                className="button button-primary accent button-large"
+                onClick={() => { /* run sync */ }}
+              >
+                Sync Now
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

@@ -5,7 +5,10 @@ use crate::web::{
         client::{CanvasClient, EnrollmentType},
         models::{assignment, course},
     },
-    notion::{client::NotionClient, models::user},
+    notion::{
+        client::NotionClient,
+        models::{page_query, user},
+    },
 };
 
 use std::env;
@@ -39,11 +42,25 @@ async fn validate_cavas_token(token: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn validate_notion_token(token: String) -> Result<user::Root, String> {
+async fn get_notion_user(token: String) -> Result<user::Root, String> {
     NotionClient::new(token)
         .list_users()
         .await
         .map_err(|e| e.to_string())
+}
+#[tauri::command]
+async fn query_user_pages(
+    token: String,
+    query: String,
+    maxPages: i32,
+) -> Result<page_query::Root, String> {
+    NotionClient::new(token)
+        .search_pages(query, maxPages)
+        .await
+        .map_err(|e| {
+            println!("{}", e);
+            e.to_string()
+        })
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -54,7 +71,8 @@ pub fn run() {
             get_courses,
             get_assignments,
             validate_cavas_token,
-            validate_notion_token
+            get_notion_user,
+            query_user_pages
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

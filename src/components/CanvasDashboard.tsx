@@ -69,13 +69,6 @@ export const CanvasDashboard: React.FC<CanvasDashboardProps> = ({
           <div className="activity-section">
             <h3 className="section-title">Data Log</h3>
             <div className="activity-list">
-              <div className="activity-item">
-                <div className="activity-icon">📚</div>
-                <div className="activity-content">
-                  <div className="activity-title">Ready to sync</div>
-                  <div className="activity-time">Configure your sync settings to begin</div>
-                </div>
-              </div>
             </div>
           </div>
         </>

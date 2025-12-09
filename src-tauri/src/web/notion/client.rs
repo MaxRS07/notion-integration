@@ -1,5 +1,5 @@
 use crate::web::error::AppError;
-use crate::web::notion::models::user;
+use crate::web::notion::models::{page_query, user};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tauri_plugin_http::reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE},
@@ -211,5 +211,16 @@ impl NotionClient {
         let body = serde_json::json!({ "children": children });
         self.patch(&format!("/blocks/{block_id}/children"), body)
             .await
+    }
+    pub async fn search_pages(
+        &self,
+        query: String,
+        response_size: i32,
+    ) -> Result<page_query::Root, AppError> {
+        let body = serde_json::json!({
+            "page_size": response_size,
+            "query": query
+        });
+        self.post("/search", body).await
     }
 }

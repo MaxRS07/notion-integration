@@ -8,6 +8,9 @@ import { AppSettings } from './components/AppSettings';
 import { Settings, SyncStatus, IntegrationType } from './types';
 import { storage } from './utils/storage';
 import { useSystemTheme } from './utils/useSystemTheme';
+
+import canvas from "./assets/icons/canvas.svg"
+
 import './App.css';
 
 function App() {
@@ -39,11 +42,11 @@ function App() {
 
   const handleSync = async () => {
     setSyncStatus({ ...syncStatus, status: 'syncing', message: 'Synchronizing data...' });
-    
+
     try {
       // Simulate sync operation
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       setSyncStatus({
         lastSync: new Date(),
         status: 'success',
@@ -74,7 +77,7 @@ function App() {
       case 'canvas':
         return {
           title: 'Canvas LMS',
-          icon: '📚',
+          icon: canvas,
           description: 'Sync courses and assignments to Notion',
         };
       default:
@@ -92,17 +95,17 @@ function App() {
   if (currentIntegration === 'app-settings') {
     return (
       <div className="app">
-        <Sidebar 
+        <Sidebar
           currentIntegration={currentIntegration}
           onSelectIntegration={(integration) => {
             setCurrentIntegration(integration);
             setCurrentView('dashboard'); // Reset to dashboard when switching
           }}
         />
-        
+
         <main className="main-content">
           <div className="content-area full-width">
-            <AppSettings 
+            <AppSettings
               settings={settings}
               onSettingsSaved={handleSettingsUpdate}
             />
@@ -115,41 +118,41 @@ function App() {
   // Render Integration pages (with tabs)
   return (
     <div className="app">
-      <Sidebar 
+      <Sidebar
         currentIntegration={currentIntegration}
         onSelectIntegration={(integration) => {
           setCurrentIntegration(integration);
           setCurrentView('dashboard'); // Reset to dashboard when switching
         }}
       />
-      
+
       <main className="main-content">
         <IntegrationHeader
           title={integrationInfo.title}
-          icon={integrationInfo.icon}
+          img={integrationInfo.icon}
           description={integrationInfo.description}
           onNavigate={setCurrentView}
           currentView={currentView}
         />
-        
+
         <div className="content-area">
           {currentIntegration === 'canvas' && (
             <>
               {currentView === 'dashboard' && (
-                <CanvasDashboard 
+                <CanvasDashboard
                   settings={settings}
                   syncStatus={syncStatus}
                   onSync={handleSync}
                 />
               )}
               {currentView === 'settings' && (
-                <CanvasSettings 
+                <CanvasSettings
                   settings={settings}
                   onSettingsSaved={handleSettingsUpdate}
                 />
               )}
               {currentView === 'actions' && (
-                <CanvasActions 
+                <CanvasActions
                   settings={settings}
                   onAction={handleAction}
                 />

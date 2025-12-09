@@ -10,6 +10,7 @@ export const storage = {
     }
     return {
       canvasToken: '',
+      canvasSchoolName: '',
       notionToken: '',
       syncInterval: 15,
       autoSync: false,

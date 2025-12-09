@@ -35,8 +35,6 @@ export const CanvasSettings: React.FC<CanvasSettingsProps> = ({ settings: initia
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const isValid = settings.canvasToken.trim() !== '';
-
   return (
     <div className="integration-settings">
       <div className="settings-container">
@@ -45,6 +43,23 @@ export const CanvasSettings: React.FC<CanvasSettingsProps> = ({ settings: initia
           <p className="section-description">
             Connect your Canvas LMS account to enable synchronization with Notion.
           </p>
+
+          <div className="form-group">
+            <label className="form-label">
+              School Name
+              <span className="label-required">*</span>
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={settings.canvasSchoolName}
+              onChange={(e) => setSettings({ ...settings, canvasSchoolName: e.target.value })}
+              placeholder="northeastern"
+            />
+            <p className="form-help">
+              Enter your school as it appears in your canvas domain <br></br>e.g. northeastern in https://northeastern.instructure.com/
+            </p>
+          </div>
 
           <div className="form-group">
             <label className="form-label">

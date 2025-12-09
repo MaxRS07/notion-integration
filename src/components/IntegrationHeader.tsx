@@ -4,7 +4,7 @@ import actionIcon from '../assets/icons/action.svg';
 
 interface IntegrationHeaderProps {
   title: string;
-  icon: string;
+  img: string;
   description: string;
   onNavigate: (view: 'dashboard' | 'settings' | 'actions') => void;
   currentView: 'dashboard' | 'settings' | 'actions';
@@ -12,7 +12,7 @@ interface IntegrationHeaderProps {
 
 export const IntegrationHeader: React.FC<IntegrationHeaderProps> = ({
   title,
-  icon,
+  img,
   description,
   onNavigate,
   currentView,
@@ -21,7 +21,7 @@ export const IntegrationHeader: React.FC<IntegrationHeaderProps> = ({
     <div className="integration-header">
       <div className="header-top">
         <div className="header-info">
-          <div className="header-icon">{icon}</div>
+          <img className='header-icon' src={img}></img>
           <div className="header-text">
             <h1 className="header-title">{title}</h1>
             <p className="header-description">{description}</p>

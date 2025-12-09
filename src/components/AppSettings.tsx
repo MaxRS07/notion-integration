@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Settings } from '../types';
 import { storage } from '../utils/storage';
 import load from '../assets/icons/loading.svg'
-import Root from "../models/notion/user"
-import { getNotionUserInfo } from '../utils/notion';
+import User from "../models/notion/user"
+import PageQuery, { Result } from "../models/notion/page_query"
+import { getNotionUserInfo, getPageList } from '../utils/notion';
 
 interface AppSettingsProps {
   settings: Settings;
@@ -14,7 +15,8 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ settings: initialSetti
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [showNotionToken, setShowNotionToken] = useState(false);
   const [connected, setConnected] = useState<string | null>(null)
-  const [userInfo, setUserInfo] = useState<Root | null>(null)
+  const [userInfo, setUserInfo] = useState<User | null>(null)
+  const [pages, setPages] = useState<string>("No pages found");
 
   useEffect(() => {
     setConnected(null);
@@ -82,9 +84,10 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ settings: initialSetti
             <LoadingStatusIndicator connected={connected} />
             {userInfo?.results && userInfo.results.length > 0 &&
               <p>
-                {userInfo?.results[0].name}
+                {userInfo?.results[0].person?.email}
               </p>
             }
+            <p>{pages}</p>
           </div>
 
           <div className="info-box">

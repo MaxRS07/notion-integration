@@ -32,16 +32,16 @@ export const StatusCard: React.FC<StatusCardProps> = ({ status, onSync }) => {
         return '○';
     }
   };
-
+  const initialize = () => { }
   const formatLastSync = () => {
     if (!status.lastSync) return 'Never';
     const now = new Date();
     const diff = now.getTime() - status.lastSync.getTime();
     const minutes = Math.floor(diff / 60000);
-    
+
     if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    
+
     const hours = Math.floor(minutes / 60);
     return `${hours} hour${hours > 1 ? 's' : ''} ago`;
   };
@@ -53,9 +53,9 @@ export const StatusCard: React.FC<StatusCardProps> = ({ status, onSync }) => {
           <div className={`status-indicator ${getStatusColor()}`}>
             <span className="status-icon">{getStatusIcon()}</span>
             <span className="status-text">
-              {status.status === 'syncing' ? 'Syncing...' : 
-               status.status === 'success' ? 'Up to date' :
-               status.status === 'error' ? 'Error' : 'Idle'}
+              {status.status === 'syncing' ? 'Syncing...' :
+                status.status === 'success' ? 'Up to date' :
+                  status.status === 'error' ? 'Error' : 'Idle'}
             </span>
           </div>
           <div className="status-details">
@@ -67,7 +67,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ status, onSync }) => {
         </div>
         <button
           className="sync-button"
-          onClick={onSync}
+          onClick={!status.lastSync ? initialize : onSync}
           disabled={status.status === 'syncing'}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

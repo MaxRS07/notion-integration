@@ -1,5 +1,6 @@
 export interface Settings {
   canvasToken: string;
+  canvasSchoolName: string;
   notionToken: string;
   syncInterval: number;
   autoSync: boolean;
