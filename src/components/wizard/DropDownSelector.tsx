@@ -2,7 +2,7 @@ import { SearchDropdown } from './SearchDropdown';
 
 interface DropdownSelectorProps<T extends { id: string; name: string }> {
     searchQuery: string;
-    selectedValue: string;
+    selectedValue: string | null;
     showDropdown: boolean;
     placeholder: string;
     label?: string;
@@ -15,7 +15,6 @@ interface DropdownSelectorProps<T extends { id: string; name: string }> {
     onFocus: () => void;
     onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
     onClear: () => void;
-    showCreateOptions?: boolean;
 }
 
 function DropdownSelector<T extends { id: string; name: string }>({
@@ -33,7 +32,6 @@ function DropdownSelector<T extends { id: string; name: string }>({
     onFocus,
     onBlur,
     onClear,
-    showCreateOptions,
 }: DropdownSelectorProps<T>) {
     const selectedOption = options.find(o => getOptionId(o) === selectedValue);
 
@@ -56,7 +54,6 @@ function DropdownSelector<T extends { id: string; name: string }>({
             onBlur={onBlur}
             onClear={onClear}
             getSelectedName={() => selectedOption?.name || ''}
-            showCreateOptions={showCreateOptions}
         />
     );
 }

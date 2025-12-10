@@ -1,21 +1,38 @@
 import React, { useRef } from 'react';
+import { DropdownOption } from './DestinationSelector';
 
 interface SearchDropdownProps {
   searchQuery: string;
-  selectedValue: string;
+  selectedValue: string | null;
   showDropdown: boolean;
   placeholder: string;
   icon?: string;
   label?: string;
-  options: Array<{ id: string; name: string; description: string }>;
+  options: DropdownOption[] | Map<string, DropdownOption[]>;
+  buttonStyle?: React.CSSProperties[] | React.CSSProperties;
   onSearchChange: (value: string) => void;
   onSelect: (id: string) => void;
   onFocus: () => void;
   onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
   onClear: () => void;
   getSelectedName: () => string;
-  showCreateOptions?: boolean;
 }
+
+declare global {
+  interface Map<K, V> {
+    mapEntries<T>(callbackFn: (key: K, value: V) => T): T[];
+  }
+}
+Map.prototype.mapEntries = function <K, V, T>(
+  this: Map<K, V>,
+  callbackFn: (key: K, value: V) => T
+): T[] {
+  const result: T[] = [];
+  for (const [key, value] of this.entries()) {
+    result.push(callbackFn(key, value));
+  }
+  return result;
+};
 
 export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   searchQuery,
@@ -25,12 +42,12 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
   icon,
   label,
   options,
+  buttonStyle,
   onSearchChange,
   onSelect,
   onFocus,
   onBlur,
   getSelectedName,
-  showCreateOptions = false,
 }) => {
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -45,55 +62,79 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
             placeholder={placeholder}
             value={selectedValue ? getSelectedName() : searchQuery}
             onChange={e => {
-              onSearchChange(e.target.value);
+              if (selectedValue) {
+                // Clear selection when user starts typing
+                onSearchChange(e.target.value);
+              } else {
+                onSearchChange(e.target.value);
+              }
             }}
-            onFocus={onFocus}
+            onFocus={() => {
+              if (selectedValue) {
+                // Clear selection on focus so user can search again
+              }
+              onFocus();
+            }}
           />
           <span className="search-icon">{icon}</span>
         </div>
 
         {showDropdown && !selectedValue && (
           <div className="search-dropdown">
-            {searchQuery.length === 0 && showCreateOptions && (
-              <div className="dropdown-section">
-                <div className="dropdown-heading">Create New</div>
-                <button className="dropdown-item">
-                  <div className="dropdown-info">
-                    <div className="dropdown-name">New Page</div>
-                    <div className="dropdown-type">Create a new page as the destination</div>
-                  </div>
-                </button>
-                <button className="dropdown-item">
-                  <div className="dropdown-info">
-                    <div className="dropdown-name">New Datasource</div>
-                    <div className="dropdown-type">Create a new datasource as the destination</div>
-                  </div>
-                </button>
-              </div>
-            )}
-            {options.length > 0 && (
-              <div className="dropdown-section">
-                <div className="dropdown-heading">{showCreateOptions ? 'Pages' : 'Available Options'}</div>
-                {options.map(option => (
-                  <button
-                    key={option.id}
-                    className="dropdown-item"
-                    onClick={() => onSelect(option.id)}
-                  >
-                    <div className="dropdown-info">
-                      <div className="dropdown-name">{option.name}</div>
-                      <div className="dropdown-type">{option.description}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+            {Array.isArray(options) ? (
+              options.length > 0 && (
+                <div className="dropdown-section">
+                  {options.map((option, i) => (
+                    <button
+                      key={option.id}
+                      className="dropdown-item"
+                      style={Array.isArray(buttonStyle) ? buttonStyle[i] ?? { backgroundColor: "red" } : buttonStyle ?? { color: "red" }}
+                      onClick={() => onSelect(option.id)}
+                    >
+                      <div className="dropdown-info">
+                        <div className="dropdown-name">
+                          {option.name}
+                        </div>
+                        <div className="dropdown-type">{option.description}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )
+            ) : options instanceof Map ? (
+              options.mapEntries((groupName, groupOptions) => (
+                <div key={groupName} className="dropdown-section">
+                  <div className="dropdown-heading">{groupName}</div>
+                  {groupOptions.map((option, i) => (
+                    <button
+                      key={option.id}
+                      className="dropdown-item"
+                      onClick={() => onSelect(option.id)}
+                    >
+                      <div className="dropdown-info">
+                        <div
+                          className="dropdown-name"
+                          style={Array.isArray(buttonStyle) ? buttonStyle[i] ?? {} : buttonStyle ?? {}}
+                        >
+                          {option.name}
+                        </div>
+                        <div className="dropdown-type">{option.description}</div>
+                      </div>
+                    </button>
+                  )
+                  )}
+                </div>
+              ))
+            ) : null}
 
-            {options.length === 0 && searchQuery.length > 0 && (
-              <div className="dropdown-empty">
-                No results found for "{searchQuery}"
-              </div>
-            )}
+            {
+              (Array.isArray(options) && options.length === 0) ||
+              (options instanceof Map && options.size === 0) &&
+              searchQuery.length > 0 && (
+                <div className="dropdown-empty">
+                  No results found for "{searchQuery}"
+                </div>
+              )}
           </div>
         )}
       </div>

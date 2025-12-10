@@ -1,24 +1,7 @@
-import React from 'react';
-import { Result } from '../../models/notion/page_query';
-import DropdownSelector from './DropDownSelector';
-import DestinationPreview from './SelectionPreview';
-
-interface DatabaseColumn {
-  id: string;
-  name: string;
-  description: string;
-  type:
-  | 'title'
-  | 'text'
-  | 'number'
-  | 'select'
-  | 'multi_select'
-  | 'date'
-  | 'checkbox'
-  | 'url'
-  | 'email'
-  | 'phone';
-}
+import React, { useState, useMemo } from 'react';
+import { SearchDropdown } from './SearchDropdown';
+import { DatabaseColumn } from './FieldMappingForm';
+import _, { Result } from "../../models/notion/page_query"
 
 export class NotionDestination {
   data: Result;
@@ -61,14 +44,39 @@ export class NotionDestination {
 
 type CanvasDataType = 'courses' | 'assignments' | 'announcements' | 'grades' | '';
 
-const canvasDataTypes = [
+type PollingInterval = '5' | '10' | '15' | '30' | '60';
+
+export interface DropdownOption {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+}
+
+interface DestinationSelectorProps {
+  notionDestinations: NotionDestination[];
+  initialSelectedDestination?: NotionDestination | null;
+  initialSelectedActionType?: string;
+  initialSelectedDataType?: CanvasDataType | '';
+  onContinue: (destination: NotionDestination, actionType: string, dataType: CanvasDataType | '', pollType: string) => void;
+}
+
+const canvasDataTypes: DropdownOption[] = [
   { id: 'courses', name: 'Courses', icon: '📚', description: 'Import your enrolled courses from Canvas' },
   { id: 'assignments', name: 'Assignments', icon: '✅', description: 'Sync assignments and due dates' },
   { id: 'announcements', name: 'Announcements', icon: '📢', description: 'Get course announcements' },
   { id: 'grades', name: 'Grades', icon: '📊', description: 'Track your grades and scores' },
 ];
 
-const actionTypes = [
+const pollingIntervals: DropdownOption[] = [
+  { id: '5', name: '5 minutes' },
+  { id: '10', name: '10 minutes' },
+  { id: '15', name: '15 minutes' },
+  { id: '30', name: '30 minutes' },
+  { id: '60', name: '60 minutes' },
+]
+
+const actionTypes: DropdownOption[] = [
   { id: 'add_block', name: 'Add Block', description: 'Add content blocks to the page' },
   { id: 'edit_page', name: 'Edit Page', description: 'Update existing page properties' },
   { id: 'make_comment', name: 'Make Comment', description: 'Add comments to the page' },
@@ -76,52 +84,50 @@ const actionTypes = [
   { id: 'add_database_entry', name: 'Add Database Entry', description: 'Add new rows to database' },
 ];
 
-interface DestinationSelectorProps {
-  selectedDestination: NotionDestination | null;
-  searchQuery: string;
-  showDropdown: boolean;
-  notionDestinations: NotionDestination[];
-  selectedActionType: string;
-  actionSearchQuery: string;
-  showActionDropdown: boolean;
-  selectedDataType: CanvasDataType;
-  dataSearchQuery: string;
-  showDataDropdown: boolean;
-  onSearchChange: (value: string) => void;
-  onSelectDestination: (destination: NotionDestination) => void;
-  onFocus: () => void;
-  onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
-  onClearDestination: () => void;
-  onActionSearchChange: (value: string) => void;
-  onSelectActionType: (actionId: string) => void;
-  onActionFocus: () => void;
-  onActionBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
-  onClearActionType: () => void;
-  onDataSearchChange: (value: string) => void;
-  onSelectDataType: (actionId: string) => void;
-  onDataFocus: () => void;
-  onDataBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
-  onClearDataType: () => void;
-  onBack: () => void;
-  onNext: () => void;
-}
+export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
+  notionDestinations,
+  initialSelectedDestination = null,
+  initialSelectedActionType = '',
+  initialSelectedDataType = '',
+  onContinue,
+}) => {
+  // internal state
+  const [selectedDestination, setSelectedDestination] = useState<NotionDestination | null>(initialSelectedDestination);
+  const [selectedActionType, setSelectedActionType] = useState(initialSelectedActionType);
+  const [selectedDataType, setSelectedDataType] = useState<CanvasDataType | ''>(initialSelectedDataType);
+  const [selectedPollType, setSelectedPollType] = useState<PollingInterval | ''>('30');
 
-export const DestinationSelector: React.FC<DestinationSelectorProps> = props => {
-  const sortedDestinations = [...props.notionDestinations].sort((a, b) => {
-    const aNoTitle = a.getName() === '(no title)';
-    const bNoTitle = b.getName() === '(no title)';
-    if (aNoTitle && !bNoTitle) return 1;
-    if (!aNoTitle && bNoTitle) return -1;
-    return a.getName().localeCompare(b.getName());
-  });
+  const [destinationQuery, setDestinationQuery] = useState('');
+  const [actionQuery, setActionQuery] = useState('');
+  const [dataQuery, setDataQuery] = useState('');
+  const [pollQuery, setPollQuery] = useState('');
 
-  const filteredDestinations = sortedDestinations.filter(dest =>
-    dest.getName().toLowerCase().includes(props.searchQuery.toLowerCase())
-  );
+  const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
+  const [showActionDropdown, setShowActionDropdown] = useState(false);
+  const [showDataDropdown, setShowDataDropdown] = useState(false);
+  const [showPollDropdown, setShowPollDropdown] = useState(false);
 
-  const filteredActionTypes = actionTypes.filter(action =>
-    action.name.toLowerCase().includes(props.actionSearchQuery.toLowerCase())
-  );
+  const filteredDestinations = useMemo(() => {
+    return notionDestinations
+      .filter(d => d.getName().toLowerCase().includes(destinationQuery.toLowerCase()))
+      .sort((a, b) => {
+        const _a = a.getName();
+        const _b = b.getName();
+        if (_a === '(no title)' && _b !== '(no title)') return 1;
+        if (_a !== '(no title)' && _b === '(no title)') return -1;
+        return _a.localeCompare(_b)
+      });
+  }, [destinationQuery, notionDestinations]);
+
+  const filteredActions = useMemo(() => {
+    return actionTypes.filter(a => a.name.toLowerCase().includes(actionQuery.toLowerCase()));
+  }, [actionQuery]);
+
+  const filteredDataTypes = useMemo(() => {
+    return canvasDataTypes.filter(d => d.name.toLowerCase().includes(dataQuery.toLowerCase()));
+  }, [dataQuery]);
+
+  const canContinue = !!selectedDestination && !!selectedActionType && !!selectedDataType;
 
   return (
     <div className="wizard-step">
@@ -130,91 +136,119 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = props => 
         <p className="step-description">Choose action source and target</p>
       </div>
 
-      <div className="destination-selector" style={{ maxWidth: '900px', marginTop: '24px' }}>
-        <DropdownSelector
-          searchQuery={props.dataSearchQuery}
-          selectedValue={props.selectedDataType}
-          showDropdown={props.showDataDropdown}
+      <div className="destination-selector" style={{ maxWidth: '900px', marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <SearchDropdown
+          label="Select Canvas Type"
           placeholder="Select data to get from Canvas..."
-          label="Canvas Data Type"
-          options={canvasDataTypes}
-          getOptionId={o => o.id}
-          getOptionName={o => o.name}
-          onSearchChange={value => { props.onDataSearchChange(value); props.onClearDataType(); props.onDataFocus(); }}
-          onSelect={id => props.onSelectDataType(id as CanvasDataType)}
-          onFocus={props.onDataFocus}
-          onBlur={props.onDataBlur}
-          onClear={() => { props.onClearDataType(); props.onDataFocus(); }}
-        />
-
-        <DropdownSelector
-          searchQuery={props.actionSearchQuery}
-          selectedValue={props.selectedActionType}
-          showDropdown={props.showActionDropdown}
-          placeholder="Select action type..."
-          label="Action Type"
-          options={filteredActionTypes}
-          getOptionId={o => o.id}
-          getOptionName={o => o.name}
-          onSearchChange={value => { props.onActionSearchChange(value); props.onClearActionType(); props.onActionFocus(); }}
-          onSelect={props.onSelectActionType}
-          onFocus={props.onActionFocus}
-          onBlur={props.onActionBlur}
-          onClear={() => { props.onClearActionType(); props.onActionFocus(); }}
-        />
-
-        <DropdownSelector
-          searchQuery={props.searchQuery}
-          selectedValue={props.selectedDestination?.getId() || ''}
-          showDropdown={props.showDropdown}
-          placeholder="Search pages and databases..."
-          label="Notion Destination"
-          options={filteredDestinations.map(dest => ({
-            id: dest.getId(),
-            name: dest.getName(),
-            description: dest.getDisplayType(),
-          }))}
-          getOptionId={o => o.id}
-          getOptionName={o => o.name}
-          onSearchChange={value => { props.onSearchChange(value); props.onClearDestination(); props.onFocus(); }}
-          onSelect={id => {
-            const dest = props.notionDestinations.find(d => d.getId() === id);
-            if (dest) props.onSelectDestination(dest);
+          searchQuery={dataQuery}
+          selectedValue={selectedDataType}
+          showDropdown={showDataDropdown}
+          options={filteredDataTypes}
+          getSelectedName={() => filteredDataTypes.find(d => d.id === selectedDataType)?.name || ''}
+          onSearchChange={(value) => {
+            setDataQuery(value);
+            if (selectedDataType) {
+              setSelectedDataType('');
+            }
           }}
-          onFocus={props.onFocus}
-          onBlur={props.onBlur}
-          onClear={() => { props.onClearDestination(); props.onFocus(); }}
-          showCreateOptions
+          onSelect={(id) => {
+            setSelectedDataType(id as CanvasDataType);
+            setShowDataDropdown(false);
+          }}
+          onFocus={() => setShowDataDropdown(true)}
+          onBlur={() => setTimeout(() => setShowDataDropdown(false), 200)}
+          onClear={() => setSelectedDataType('')}
         />
-
-        <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-          <DestinationPreview
-            name={actionTypes.find(a => a.id === props.selectedActionType)?.name || ''}
-            description={actionTypes.find(a => a.id === props.selectedActionType)?.description || ''}
-            onClear={props.onClearActionType}
-            isActive={!!props.selectedActionType}
-            placeholderName="No action selected"
-            placeholderDescription="Choose an action type above"
-          />
-          <DestinationPreview
-            name={props.selectedDestination?.getName() || ''}
-            description={props.selectedDestination?.getDisplayType() || ''}
-            onClear={props.onClearDestination}
-            isActive={!!props.selectedDestination}
-            placeholderName="No destination selected"
-            placeholderDescription="Search for a page or database above"
-          />
-        </div>
       </div>
 
-      <div className="wizard-actions">
-        <button className="button button-primary button-large" onClick={props.onBack}>Go Back</button>
+      <SearchDropdown
+        label="Polling Interval"
+        placeholder="Select polling interval..."
+        searchQuery={pollQuery}
+        selectedValue={selectedPollType}
+        showDropdown={showPollDropdown}
+        options={pollingIntervals}
+        getSelectedName={() => pollingIntervals.find(d => d.id === selectedPollType)?.name || ''}
+        onSearchChange={(value) => {
+          setPollQuery(value);
+          if (selectedDataType) {
+            setSelectedPollType('');
+          }
+        }}
+        onSelect={(id) => {
+          setSelectedPollType(id as PollingInterval);
+          setShowPollDropdown(false);
+        }}
+        onFocus={() => setShowPollDropdown(true)}
+        onBlur={() => setTimeout(() => setShowPollDropdown(false), 200)}
+        onClear={() => setSelectedPollType('')}
+      />
+
+
+      <SearchDropdown
+        label="Action Type"
+        placeholder="Select action type..."
+        searchQuery={actionQuery}
+        selectedValue={selectedActionType}
+        showDropdown={showActionDropdown}
+        options={filteredActions}
+        getSelectedName={() => filteredActions.find(a => a.id === selectedActionType)?.name || ''}
+        onSearchChange={(value) => {
+          setActionQuery(value);
+          if (selectedActionType) {
+            setSelectedActionType('');
+          }
+        }}
+        onSelect={(id) => {
+          setSelectedActionType(id);
+          setShowActionDropdown(false);
+        }}
+        onFocus={() => setShowActionDropdown(true)}
+        onBlur={() => setTimeout(() => setShowActionDropdown(false), 200)}
+        onClear={() => setSelectedActionType('')}
+      />
+
+      <SearchDropdown
+        label="Notion Destination"
+        placeholder="Search pages and databases..."
+        searchQuery={destinationQuery}
+        selectedValue={selectedDestination?.getId() || ''}
+        showDropdown={showDestinationDropdown}
+        options={filteredDestinations.map(d => ({
+          id: d.getId(),
+          name: d.getName(),
+          description: d.getDisplayType(),
+        }))}
+        getSelectedName={() => selectedDestination?.getName() || ''}
+        onSearchChange={(value) => {
+          setDestinationQuery(value);
+          if (selectedDestination) {
+            setSelectedDestination(null);
+          }
+        }}
+        onSelect={(id) => {
+          const dest = notionDestinations.find(d => d.getId() === id);
+          if (dest) {
+            setSelectedDestination(dest);
+            setShowDestinationDropdown(false);
+          }
+        }}
+        onFocus={() => setShowDestinationDropdown(true)}
+        onBlur={() => setTimeout(() => setShowDestinationDropdown(false), 200)}
+        onClear={() => setSelectedDestination(null)}
+      />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
         <button
           className="button button-primary accent button-large"
-          onClick={props.onNext}
-          disabled={!props.selectedDestination || !props.selectedActionType}
+          disabled={!canContinue}
+          onClick={() => {
+            if (selectedDestination && selectedActionType && selectedDataType) {
+              onContinue(selectedDestination, selectedActionType, selectedDataType, selectedPollType);
+            }
+          }}
         >
-          Next
+          Continue
         </button>
       </div>
     </div>
