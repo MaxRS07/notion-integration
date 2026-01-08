@@ -5,7 +5,7 @@ import { BlockHeader } from "./EditorHeader";
 import { BlockFlow } from "./Flow";
 import { BlockData, EditorBlock } from "./types";
 import "./BlockEditor.css";
-import { Variable, VariableGroup } from "../../models/shared/mapvar";
+import { DisplayVariable, Variable, VariableGroup } from "../../models/shared/mapvar";
 
 interface BlockEditorProps {
   initialBlocks?: BlockData[];
@@ -41,7 +41,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
 
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
-  const [environmentVars, setEnvironmentVars] = useState<Record<string, VariableGroup>>({});
+  const [environmentVars, setEnvironmentVars] = useState<Record<string, DisplayVariable>>({});
 
   const [runtimeVars, setRuntimeVars] = useState<Record<string, Variable<any>>>({});
 

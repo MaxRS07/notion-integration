@@ -1,6 +1,6 @@
 // CanvasGetBlocks.tsx
 import React from 'react';
-import { BlockEditorContext, BlockDefinition, BlockRenderProps, BlockType } from './types';
+import { BlockEditorContext, BlockDefinition, BlockRenderProps, BlockType, BlockRuntimeContext } from './types';
 import canvas from '../../../assets/icons/canvas.svg';
 import './BlockStyles.css';
 import { getAllAssignments, getUserCourses } from '../../../utils/canvas';
@@ -105,7 +105,7 @@ function CanvasGetRenderer(props: BlockRenderProps<CanvasTriggerData> & { title:
 function createCanvasGetBlock(config: {
   label: string;
   description: string;
-  onRun: (data: CanvasTriggerData, context: BlockEditorContext) => Promise<any>;
+  onRun: (data: CanvasTriggerData, context: BlockRuntimeContext) => Promise<any>;
   onAdd?: (data: CanvasTriggerData, context: BlockEditorContext) => void;
   onRemove?: (data: CanvasTriggerData, context: BlockEditorContext) => void;
 }): BlockDefinition<CanvasTriggerData> {
@@ -146,25 +146,31 @@ function createCanvasGetBlock(config: {
 export const GetCanvasCourses = createCanvasGetBlock({
   label: 'Get Courses from Canvas',
   description: 'Import your enrolled courses from Canvas',
-  onRun: async (data: CanvasTriggerData, context: BlockEditorContext) => {
+  onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => {
     getUserCourses(data.token, data.domain).then(courses => {
       let courseVars: Variable<Course[]> = {
         name: 'Courses',
         value: courses,
         description: 'List of courses from Canvas'
       };
-      context.setEnvironmentVars(prev => {
+      context.setRuntimeVars(prev => {
         return { ...prev, 'courses': { "label": "Canvas Courses", "variables": { "courses": courseVars } } }
       });
     });
-  }
-});
+  },
+  onAdd: (data: CanvasTriggerData, context: BlockEditorContext) => {
+    let courseVars: Variable<Course[]> = {
+      name: 'Courses',
+      value: [],
+      description: 'List of courses from Canvas'
+    };
+  });
 
 export const GetCanvasAssignments = createCanvasGetBlock({
   label: 'Get Assignments from Canvas',
   description: 'Sync assignments and due dates',
-  onRun: async (data: CanvasTriggerData, context: BlockEditorContext) => {
-    getAllAssignments(, context.environmentVars['settings'].variables['domain'].value).then(assignments => {
+  onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => {
+    getAllAssignments(data.token, data.domain).then(assignments => {
       context.setEnvironmentVars(prev => prev)
     });
   },

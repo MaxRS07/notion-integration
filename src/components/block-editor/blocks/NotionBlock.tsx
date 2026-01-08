@@ -1,6 +1,6 @@
 // NotionActionBlocks.tsx
 import React, { useMemo, useState } from 'react';
-import { BlockEditorContext, BlockDefinition, BlockRenderProps, BlockType } from './types';
+import { BlockEditorContext, BlockDefinition, BlockRenderProps, BlockType, BlockRuntimeContext } from './types';
 import { NotionDestination } from '../../wizard/DestinationSelector';
 import notionIcon from '../../../assets/icons/notion.svg';
 import './BlockStyles.css';
@@ -238,7 +238,7 @@ function createNotionActionBlock(config: {
   label: string;
   description: string;
   destinationFilter?: 'page' | 'data_source';
-  onRun: (data: NotionActionData, context: BlockEditorContext) => Promise<any>;
+  onRun: (data: NotionActionData, context: BlockRuntimeContext) => Promise<any>;
 }): BlockDefinition<NotionActionData> {
   return {
     type: BlockType.POST,
@@ -281,29 +281,34 @@ export const NotionAddBlock = createNotionActionBlock({
   label: 'Add Block to Notion',
   description: 'Add content blocks to a Notion page',
   destinationFilter: 'page',
+  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => { }
 });
 
 export const NotionEditPage = createNotionActionBlock({
   label: 'Edit Notion Page',
   description: 'Update existing page properties',
   destinationFilter: 'page',
+  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => { }
 });
 
 export const NotionMakeComment = createNotionActionBlock({
   label: 'Add Comment in Notion',
   description: 'Add a comment to a Notion page',
+  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => { }
 });
 
 export const NotionAddChildPage = createNotionActionBlock({
   label: 'Add Child Page in Notion',
   description: 'Create a new child page',
   destinationFilter: 'page',
+  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => { }
 });
 
 export const NotionAddDatabaseEntry = createNotionActionBlock({
   label: 'Add Database Entry in Notion',
   description: 'Add a new row to a Notion database',
   destinationFilter: 'data_source',
+  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => { }
 });
 
 /* ------------------------------------------------------------------ */
