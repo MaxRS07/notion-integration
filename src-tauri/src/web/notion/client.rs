@@ -116,7 +116,10 @@ impl NotionClient {
                 )));
             }
         }
-        serde_json::from_str::<T>(&text).map_err(|e| AppError::Parse(e.to_string()))
+        serde_json::from_str::<T>(&text).map_err(|e| {
+            println!("{}", e);
+            AppError::Parse(e.to_string())
+        })
     }
 
     // ======================================================

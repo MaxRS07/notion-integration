@@ -92,41 +92,6 @@ export const CanvasSettings: React.FC<CanvasSettingsProps> = ({ settings: initia
         <div className="settings-divider" />
 
         <div className="settings-section">
-          <h2 className="section-title">Sync Preferences</h2>
-          <p className="section-description">
-            Customize how and when your Canvas data syncs to Notion.
-          </p>
-
-          <div className="form-group">
-            <label className="form-label">Sync Interval (minutes)</label>
-            <div className="slider-container">
-              <input
-                type="range"
-                min="5"
-                max="60"
-                step="5"
-                value={settings.syncInterval}
-                onChange={(e) => setSettings({ ...settings, syncInterval: parseInt(e.target.value) })}
-                className="form-slider"
-              />
-              <span className="slider-value">{settings.syncInterval} min</span>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="toggle-label">
-              <input
-                type="checkbox"
-                checked={settings.autoSync}
-                onChange={(e) => setSettings({ ...settings, autoSync: e.target.checked })}
-                className="form-checkbox"
-              />
-              <span>Enable automatic synchronization</span>
-            </label>
-            <p className="form-help">
-              When enabled, data will sync automatically in the background
-            </p>
-          </div>
         </div>
       </div>
     </div >

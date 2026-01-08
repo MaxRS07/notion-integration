@@ -14,9 +14,8 @@ use crate::web::{
 use std::env;
 
 #[tauri::command]
-async fn get_courses() -> Result<Vec<course::Root>, String> {
-    let token = std::env::var("CANVAS_TOKEN").map_err(|_| "CANVAS_TOKEN is missing".to_string())?;
-    let client = CanvasClient::new(token);
+async fn get_courses(token: String, domain: String) -> Result<Vec<course::Root>, String> {
+    let client = CanvasClient::new(token, domain);
 
     client
         .list_courses(EnrollmentType::Student)
@@ -24,9 +23,12 @@ async fn get_courses() -> Result<Vec<course::Root>, String> {
         .map_err(|e| e.to_string())
 }
 #[tauri::command]
-async fn get_assignments(courseId: String) -> Result<Vec<assignment::Root>, String> {
-    let token = std::env::var("CANVAS_TOKEN").map_err(|_| "CANVAS_TOKEN is missing".to_string())?;
-    let client = CanvasClient::new(token);
+async fn get_assignments(
+    courseId: String,
+    token: String,
+    domain: String,
+) -> Result<Vec<assignment::Root>, String> {
+    let client = CanvasClient::new(token, domain);
 
     client
         .assignments_by_course(courseId)
@@ -34,8 +36,8 @@ async fn get_assignments(courseId: String) -> Result<Vec<assignment::Root>, Stri
         .map_err(|e| e.to_string())
 }
 #[tauri::command]
-async fn validate_cavas_token(token: String) -> Result<(), String> {
-    CanvasClient::new(token)
+async fn validate_cavas_token(token: String, domain: String) -> Result<(), String> {
+    CanvasClient::new(token, domain)
         .ping()
         .await
         .map_err(|e| e.to_string())

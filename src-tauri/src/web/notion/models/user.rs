@@ -32,10 +32,10 @@ pub struct Person {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Bot {
-    pub owner: Owner,
-    pub workspace_name: String,
-    pub workspace_id: String,
-    pub workspace_limits: WorkspaceLimits,
+    pub owner: Option<Owner>,
+    pub workspace_name: Option<String>,
+    pub workspace_id: Option<String>,
+    pub workspace_limits: Option<WorkspaceLimits>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

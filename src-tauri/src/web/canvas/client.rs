@@ -1,10 +1,7 @@
 use crate::web::canvas::models::{self, assignment, course};
 use crate::web::error::AppError;
 use serde::{de::DeserializeOwned, Deserialize};
-use tauri::http::StatusCode;
 use tauri_plugin_http::reqwest::{header::AUTHORIZATION, Client};
-
-const BASE_URL: &str = "https://northeastern.instructure.com/api/v1";
 
 #[derive(Debug, Deserialize)]
 struct CanvasError {
@@ -38,12 +35,14 @@ impl EnrollmentType {
 pub struct CanvasClient {
     token: String,
     client: Client,
+    domain: String,
 }
 
 impl CanvasClient {
-    pub fn new(token: String) -> Self {
+    pub fn new(token: String, domain: String) -> Self {
         Self {
             token,
+            domain,
             client: Client::new(),
         }
     }
@@ -80,7 +79,7 @@ impl CanvasClient {
     where
         T: DeserializeOwned,
     {
-        let url = format!("{BASE_URL}{}", endpoint);
+        let url = format!("https://{}.instructure.com/api/v1{}", self.domain, endpoint);
 
         let response = self
             .client
@@ -127,7 +126,7 @@ impl CanvasClient {
         T: DeserializeOwned,
         B: serde::Serialize,
     {
-        let url = format!("{BASE_URL}{endpoint}");
+        let url = format!("https://{}.instructure.com/api/v1{}", self.domain, endpoint);
 
         let response = self
             .client

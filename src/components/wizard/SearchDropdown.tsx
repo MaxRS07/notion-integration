@@ -88,11 +88,10 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                     <button
                       key={option.id}
                       className="dropdown-item"
-                      style={Array.isArray(buttonStyle) ? buttonStyle[i] ?? { backgroundColor: "red" } : buttonStyle ?? { color: "red" }}
                       onClick={() => onSelect(option.id)}
                     >
                       <div className="dropdown-info">
-                        <div className="dropdown-name">
+                        <div className="dropdown-name" style={Array.isArray(buttonStyle) ? buttonStyle[i] : buttonStyle}>
                           {option.name}
                         </div>
                         <div className="dropdown-type">{option.description}</div>
@@ -102,29 +101,31 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                 </div>
               )
             ) : options instanceof Map ? (
-              options.mapEntries((groupName, groupOptions) => (
-                <div key={groupName} className="dropdown-section">
-                  <div className="dropdown-heading">{groupName}</div>
-                  {groupOptions.map((option, i) => (
-                    <button
-                      key={option.id}
-                      className="dropdown-item"
-                      onClick={() => onSelect(option.id)}
-                    >
-                      <div className="dropdown-info">
-                        <div
-                          className="dropdown-name"
-                          style={Array.isArray(buttonStyle) ? buttonStyle[i] ?? {} : buttonStyle ?? {}}
+              (() => {
+                let globalIndex = 0;
+                return options.mapEntries((groupName, groupOptions) => (
+                  <div key={groupName} className="dropdown-section">
+                    <div className="dropdown-heading">{groupName}</div>
+                    {groupOptions.map((option) => {
+                      const currentIndex = globalIndex++;
+                      return (
+                        <button
+                          key={option.id}
+                          className="dropdown-item"
+                          onClick={() => onSelect(option.id)}
                         >
-                          {option.name}
-                        </div>
-                        <div className="dropdown-type">{option.description}</div>
-                      </div>
-                    </button>
-                  )
-                  )}
-                </div>
-              ))
+                          <div className="dropdown-info">
+                            <div className="dropdown-name" style={Array.isArray(buttonStyle) ? buttonStyle[currentIndex] : buttonStyle}>
+                              {option.name}
+                            </div>
+                            <div className="dropdown-type">{option.description}</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ));
+              })()
             ) : null}
 
             {

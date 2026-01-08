@@ -30,6 +30,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ settings: initialSetti
   };
   const handleConnection = async () => {
     const info = await getNotionUserInfo(settings.notionToken);
+    console.log("Notion User Info:", info);
     if (info) {
       setConnected("");
       setUserInfo(info);
@@ -38,8 +39,6 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ settings: initialSetti
       setUserInfo(null);
     }
   }
-
-  const isValid = settings.notionToken.trim() !== '';
 
   return (
     <div className="app-settings">

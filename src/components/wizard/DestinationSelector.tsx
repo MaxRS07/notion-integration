@@ -97,6 +97,7 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
   const [selectedDataType, setSelectedDataType] = useState<CanvasDataType | ''>(initialSelectedDataType);
   const [selectedPollType, setSelectedPollType] = useState<PollingInterval | ''>('30');
 
+  const [actionName, setActionName] = useState('');
   const [destinationQuery, setDestinationQuery] = useState('');
   const [actionQuery, setActionQuery] = useState('');
   const [dataQuery, setDataQuery] = useState('');
@@ -137,29 +138,33 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
       </div>
 
       <div className="destination-selector" style={{ maxWidth: '900px', marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <SearchDropdown
-          label="Select Canvas Type"
-          placeholder="Select data to get from Canvas..."
-          searchQuery={dataQuery}
-          selectedValue={selectedDataType}
-          showDropdown={showDataDropdown}
-          options={filteredDataTypes}
-          getSelectedName={() => filteredDataTypes.find(d => d.id === selectedDataType)?.name || ''}
-          onSearchChange={(value) => {
-            setDataQuery(value);
-            if (selectedDataType) {
-              setSelectedDataType('');
-            }
-          }}
-          onSelect={(id) => {
-            setSelectedDataType(id as CanvasDataType);
-            setShowDataDropdown(false);
-          }}
-          onFocus={() => setShowDataDropdown(true)}
-          onBlur={() => setTimeout(() => setShowDataDropdown(false), 200)}
-          onClear={() => setSelectedDataType('')}
-        />
+        <div className='form-group'>
+          <label className='form-label'>Action Name</label>
+          <input className='form-input' type='text' placeholder='New Action' onChange={(e) => setActionName(e.target.value)}></input>
+        </div>
       </div>
+      <SearchDropdown
+        label="Select Canvas Type"
+        placeholder="Select data to get from Canvas..."
+        searchQuery={dataQuery}
+        selectedValue={selectedDataType}
+        showDropdown={showDataDropdown}
+        options={filteredDataTypes}
+        getSelectedName={() => filteredDataTypes.find(d => d.id === selectedDataType)?.name || ''}
+        onSearchChange={(value) => {
+          setDataQuery(value);
+          if (selectedDataType) {
+            setSelectedDataType('');
+          }
+        }}
+        onSelect={(id) => {
+          setSelectedDataType(id as CanvasDataType);
+          setShowDataDropdown(false);
+        }}
+        onFocus={() => setShowDataDropdown(true)}
+        onBlur={() => setTimeout(() => setShowDataDropdown(false), 200)}
+        onClear={() => setSelectedDataType('')}
+      />
 
       <SearchDropdown
         label="Polling Interval"
