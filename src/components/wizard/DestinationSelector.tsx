@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { SearchDropdown } from './SearchDropdown';
-import { DatabaseColumn } from './FieldMappingForm';
+import { DatabaseColumn } from '../../models/notion/types';
 import _, { Result } from "../../models/notion/page_query"
 
 export class NotionDestination {

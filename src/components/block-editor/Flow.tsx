@@ -1,7 +1,7 @@
 import React, { DragEvent, Dispatch, SetStateAction } from "react";
 import { EditorBlock } from "./types";
 import { FlowBlock } from "./FlowBlock";
-import { VariableGroup } from "../../models/shared/mapvar";
+import { VariableGroup, RuntimeVars } from "../../models/shared/mapvar";
 
 interface BlockFlowProps {
     blocks: EditorBlock[];
@@ -15,8 +15,10 @@ interface BlockFlowProps {
     onUpdateBlock: (id: string, data: any) => void;
     onRemoveBlock: (id: string) => void;
     onToggleCollapse: (id: string) => void;
-    environmentVars: Record<string, VariableGroup>;
-    setEnvironmentVars: Dispatch<SetStateAction<Record<string, VariableGroup>>>;
+    displayVariableGroups: VariableGroup[];
+    setDisplayVariableGroups: Dispatch<SetStateAction<VariableGroup[]>>;
+    runtimeVars: RuntimeVars;
+    setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
 }
 
 export const BlockFlow: React.FC<BlockFlowProps> = ({
@@ -31,8 +33,10 @@ export const BlockFlow: React.FC<BlockFlowProps> = ({
     onUpdateBlock,
     onRemoveBlock,
     onToggleCollapse,
-    environmentVars,
-    setEnvironmentVars
+    displayVariableGroups,
+    setDisplayVariableGroups,
+    runtimeVars,
+    setRuntimeVars,
 }) => {
     return (
         <div className="block-flow">
@@ -54,8 +58,10 @@ export const BlockFlow: React.FC<BlockFlowProps> = ({
                         onUpdate={data => onUpdateBlock(block.id, data)}
                         onDragStart={e => onBlockDragStart(e, block.id)}
                         onDragEnd={onBlockDragEnd}
-                        environmentVars={environmentVars}
-                        setEnvironmentVars={setEnvironmentVars}
+                        displayVariableGroups={displayVariableGroups}
+                        setDisplayVariableGroups={setDisplayVariableGroups}
+                        runtimeVars={runtimeVars}
+                        setRuntimeVars={setRuntimeVars}
                     />
                 </React.Fragment>
             ))}

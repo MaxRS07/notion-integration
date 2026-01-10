@@ -5,7 +5,7 @@ import { BlockHeader } from "./EditorHeader";
 import { BlockFlow } from "./Flow";
 import { BlockData, EditorBlock } from "./types";
 import "./BlockEditor.css";
-import { DisplayVariable, Variable, VariableGroup } from "../../models/shared/mapvar";
+import { VariableGroup, RuntimeVars } from "../../models/shared/mapvar";
 
 interface BlockEditorProps {
   initialBlocks?: BlockData[];
@@ -41,9 +41,11 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
 
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
-  const [environmentVars, setEnvironmentVars] = useState<Record<string, DisplayVariable>>({});
+  // display variable groups used by pickers
+  const [displayVariableGroups, setDisplayVariableGroups] = useState<VariableGroup[]>([]);
 
-  const [runtimeVars, setRuntimeVars] = useState<Record<string, Variable<any>>>({});
+  // runtime variables populated when the flow runs
+  const [runtimeVars, setRuntimeVars] = useState<RuntimeVars>({});
 
   /* ---------------- block ops ---------------- */
 
@@ -56,7 +58,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       data: def.defaultData,
     };
 
-    block.definition.onAdd?.(block.data, { environmentVars, setEnvironmentVars });
+    block.definition.onAdd?.(block.data, { displayVariableGroups, setDisplayVariableGroups, runtimeVars, setRuntimeVars });
 
     setBlocks(prev =>
       index === undefined
@@ -72,7 +74,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
     setBlocks(prev => prev.filter(b => b.id !== id));
 
     const block = blocks.find(b => b.id === id);
-    block?.definition.onRemove?.(block.data, { environmentVars, setEnvironmentVars });
+    block?.definition.onRemove?.(block.data, { displayVariableGroups, setDisplayVariableGroups, runtimeVars, setRuntimeVars });
 
     setCollapsed(prev => {
       const next = new Set(prev);
@@ -174,8 +176,10 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
           onUpdateBlock={updateBlock}
           onRemoveBlock={removeBlock}
           onToggleCollapse={toggleCollapse}
-          environmentVars={environmentVars}
-          setEnvironmentVars={setEnvironmentVars}
+          displayVariableGroups={displayVariableGroups}
+          setDisplayVariableGroups={setDisplayVariableGroups}
+          runtimeVars={runtimeVars}
+          setRuntimeVars={setRuntimeVars}
         />
       </div>
     </div>

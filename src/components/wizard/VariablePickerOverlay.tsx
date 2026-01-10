@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { VariableGroup } from '../../models/shared/mapvar';
+import { VariableGroup, VariableOption } from '../../models/shared/mapvar';
 
 function lastIndexOf(str: string, match: (char: string) => boolean) {
     for (var i = str.length; i > 0; i--) {
@@ -14,19 +14,21 @@ function lastIndexOf(str: string, match: (char: string) => boolean) {
 export interface VariablePickerOverlayProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelect: (value: string) => void;
+    onSelect: (value: VariableOption) => void;
+    query?: string;
     variableGroups: VariableGroup[];
-    inputElement?: HTMLInputElement;
+    // can be an <input> or a contenteditable element
+    inputElement?: HTMLElement | HTMLInputElement;
 }
 
 export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
     isOpen,
     onClose,
     onSelect,
+    query,
     variableGroups,
     inputElement,
 }) => {
-    const [search, setSearch] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const overlayRef = useRef<HTMLDivElement>(null);
     const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -34,22 +36,21 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
 
     const updatePosition = () => {
         if (isOpen && inputElement) {
-            const rect = inputElement.getBoundingClientRect();
+            const rect = (inputElement as HTMLElement).getBoundingClientRect();
             setPosition({
                 top: rect.bottom + 4, // Include the offset from the top of the document
                 left: rect.left,
             });
         }
     };
-    const handleSearch = (query: string) => {
-        const i = lastIndexOf(query, (char) => char === '.' || char === " ")
-        const result = i === -1 ? query : query.slice(i, query.length);
-        setSearch(result)
+    const handleSearch = (fullText: string) => {
+        const i = lastIndexOf(fullText, (char) => char === '.' || char === " ")
+        const result = i === -1 ? fullText : fullText.slice(i, fullText.length);
     }
+
     useEffect(() => {
-        handleSearch(inputElement?.value ?? "")
         updatePosition();
-    }, [isOpen, inputElement?.value]);
+    }, [inputElement]);
 
     useEffect(() => {
         const el = optionRefs.current[selectedIndex];
@@ -63,8 +64,8 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
     const filteredGroups = variableGroups
         .map(group => ({
             ...group,
-            options: group.variables.filter(opt =>
-                opt.name.replace(" ", "").toLowerCase().includes(search.toLowerCase().replace(" ", ""))
+            options: group.options.filter(opt =>
+                opt.name.replace(" ", "").toLowerCase().includes((query ?? '').toLowerCase().replace(" ", ""))
             ),
         }))
         .filter(group => group.options.length > 0);
@@ -84,7 +85,7 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
             } else if (e.key === 'Enter' || e.key === 'Return') {
                 e.preventDefault();
                 if (allOptions[selectedIndex]) {
-                    onSelect(allOptions[selectedIndex].value);
+                    onSelect(allOptions[selectedIndex]);
                 }
             } else if (e.key === 'Escape') {
                 e.preventDefault();
@@ -98,7 +99,7 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
 
     useEffect(() => {
         setSelectedIndex(0);
-    }, [search]);
+    }, [query]);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -150,12 +151,17 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
                                 return (
                                     <button
                                         key={optIdx}
-                                        ref={element => optionRefs.current[globalIndex] = element}
-                                        onClick={() => { setSelectedIndex(globalIndex); onSelect(option.value) }}
+                                        ref={element => { optionRefs.current[globalIndex] = element; }}
+                                        onClick={() => { setSelectedIndex(globalIndex); onSelect(option) }}
                                         className={`variable-option ${isSelected ? 'selected' : ''}`}
                                     >
-                                        <span className="variable-option-name">{option.name}</span>
-                                        <code className="mapping-type-tag">{option.dataType.toString()}</code>
+                                        <div>
+                                            {option.img ? <img src={option.img}></img> : option.icon ? <span className="variable-option-name">{option.icon}</span> : null}
+                                            <span className="variable-option-name">
+                                                {option.name}
+                                            </span>
+                                        </div>
+                                        <code className="mapping-type-tag">{option.dataType}</code>
                                     </button>
                                 );
                             })}

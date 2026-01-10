@@ -1,12 +1,13 @@
 // NotionActionBlocks.tsx
-import React, { useMemo, useState } from 'react';
-import { BlockEditorContext, BlockDefinition, BlockRenderProps, BlockType, BlockRuntimeContext } from './types';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { BlockDefinition, BlockRenderProps, BlockType, BlockRuntimeContext } from './types';
 import { NotionDestination } from '../../wizard/DestinationSelector';
 import notionIcon from '../../../assets/icons/notion.svg';
 import './BlockStyles.css';
 import { getPageList } from '../../../utils/notion';
 import { storage } from '../../../utils/storage';
 import { VariablePickerOverlay } from '../../wizard/VariablePickerOverlay';
+import { TokenizedInput } from './TokenizedInput';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -30,17 +31,21 @@ function NotionDestinationPicker({
   onChange,
   disabled,
   destinationFilter,
-  environmentVars,
-  setEnvironmentVars,
+  displayVariableGroups,
 }: BlockRenderProps<NotionActionData> & { destinationFilter?: 'page' | 'data_source' }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [variableQuery, setVariableQuery] = useState('');
   const [showDestinations, setShowDestinations] = useState(false);
   const [destinations, setDestinations] = useState<NotionDestination[]>(
     // ensure we have NotionDestination instances for the picker UI
     (data.notionDestinations || []).map((d: any) => (d instanceof NotionDestination ? d : new NotionDestination(d)))
   );
-  const [fieldFocused, setFieldFocused] = useState<HTMLInputElement | null>(null);
+  const [fieldFocused, setFieldFocused] = useState<HTMLElement | null>(null);
+  const tokenFieldRefs = useRef<Record<string, React.RefObject<any>>>({});
 
+  useEffect(() => {
+    console.log("variable groups updated:", displayVariableGroups);
+  }, []);
   const updateDestinations = (filter?: 'page' | 'data_source') => {
     const effectiveFilter = filter ?? destinationFilter;
     getPageList(storage.getSettings().notionToken, '', 100).then(pages => {
@@ -55,22 +60,7 @@ function NotionDestinationPicker({
     });
   };
 
-  const handleSelectVariable = (variable: string) => {
-    if (fieldFocused) {
-      const start = fieldFocused.selectionStart || 0;
-      const end = fieldFocused.selectionEnd || 0;
-      const newValue =
-        fieldFocused.value.substring(0, start) +
-        variable +
-        fieldFocused.value.substring(end);
-      fieldFocused.value = newValue;
-
-      // Manually trigger change event
-      const event = new Event('input', { bubbles: true });
-      fieldFocused.dispatchEvent(event);
-      setFieldFocused(fieldFocused);
-    }
-  };
+  // tokenized behavior moved to TokenizedField component
   const filtered = useMemo(() => {
     return destinations
       .filter(d =>
@@ -129,7 +119,7 @@ function NotionDestinationPicker({
               placeholder="Search..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              onFocus={e => updateDestinations()}
+              onFocus={() => updateDestinations()}
               autoFocus
               disabled={disabled}
             />
@@ -164,31 +154,57 @@ function NotionDestinationPicker({
                     <span>{col.name}</span>
                     <span className="mapping-type-tag">{col.type}</span>
                   </label>
-                  <input
-                    type="text"
-                    className="mapping-input"
-                    placeholder={`Value for ${col.name}`}
-                    value={data.columnMappings?.[col.name] || ''}
-                    onChange={(e) => {
-                      onChange({
-                        ...data,
-                        columnMappings: {
-                          ...data.columnMappings,
-                          [col.name]: e.target.value,
-                        },
-                      });
-                    }}
-                    onFocus={(e) => setFieldFocused(e.target)}
-                    onBlur={() => setFieldFocused(null)}
-                    disabled={disabled}
-                  />
+                  {/* Tokenized field component */}
+                  {
+                    (() => {
+                      // ensure a ref object exists for this column
+                      if (!tokenFieldRefs.current[col.name]) tokenFieldRefs.current[col.name] = React.createRef();
+                      return (
+                        <TokenizedInput
+                          ref={tokenFieldRefs.current[col.name]}
+                          onChange={(serialized: string) => {
+                            onChange({
+                              ...data,
+                              columnMappings: {
+                                ...data.columnMappings,
+                                [col.name]: serialized,
+                              },
+                            });
+                            let lastWord = serialized.split(" ").pop() || "";
+                            if (serialized.endsWith("}")) lastWord = "";
+                            setVariableQuery(lastWord);
+                          }}
+                          disabled={disabled}
+                          placeholder={`${col.description || "Value for " + col.name}`}
+                          onFocus={(el) => {
+                            const target = el.target as HTMLElement;
+                            target.dataset.fieldKey = col.name;
+                            setFieldFocused(target);
+                          }}
+                          onBlur={() => {
+                            setFieldFocused(null);
+                          }}
+                        />
+                      );
+                    })()
+                  }
                 </div>
               ))}
               <VariablePickerOverlay
                 isOpen={fieldFocused !== null}
                 onClose={() => { }}
-                onSelect={(variable) => handleSelectVariable(variable)}
-                variableGroups={environmentVars}
+                onSelect={(variable) => {
+                  // delegate insertion to the focused tokenized field's imperative handle
+                  if (!fieldFocused) return;
+                  const key = fieldFocused.dataset.fieldKey;
+                  if (!key) return;
+                  const ref = tokenFieldRefs.current[key];
+                  if (ref && ref.current && typeof ref.current.insertVariable === 'function') {
+                    ref.current.insertVariable(variable);
+                  }
+                }}
+                query={variableQuery}
+                variableGroups={displayVariableGroups}
                 inputElement={fieldFocused ?? undefined}
               />
             </form>
@@ -310,10 +326,6 @@ export const NotionAddDatabaseEntry = createNotionActionBlock({
   destinationFilter: 'data_source',
   onRun: async (data: NotionActionData, context: BlockRuntimeContext) => { }
 });
-
-/* ------------------------------------------------------------------ */
-/* Optional registry export */
-/* ------------------------------------------------------------------ */
 
 export const NotionActionBlocks = [
   NotionAddBlock,

@@ -5,9 +5,9 @@ import canvas from '../../../assets/icons/canvas.svg';
 import './BlockStyles.css';
 import { getAllAssignments, getUserCourses } from '../../../utils/canvas';
 import { storage } from '../../../utils/storage';
-import { Variable, VariableGroup } from '../../../models/shared/mapvar';
-import { NotionType } from '../../../models/notion/types';
+import { VariableGroup, RuntimeVariable } from '../../../models/shared/mapvar';
 import { Course } from '../../../models/canvas/course';
+import { camelToTitleCase } from '../../../utils/extensions';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -148,33 +148,43 @@ export const GetCanvasCourses = createCanvasGetBlock({
   description: 'Import your enrolled courses from Canvas',
   onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => {
     getUserCourses(data.token, data.domain).then(courses => {
-      let courseVars: Variable<Course[]> = {
-        name: 'Courses',
-        value: courses,
-        description: 'List of courses from Canvas'
-      };
-      context.setRuntimeVars(prev => {
-        return { ...prev, 'courses': { "label": "Canvas Courses", "variables": { "courses": courseVars } } }
-      });
+      const id = crypto.randomUUID();
+      const rv: RuntimeVariable<Course[]> = { id, value: courses };
+      context.setRuntimeVars(prev => ({ ...prev, [id]: rv }));
     });
   },
   onAdd: (data: CanvasTriggerData, context: BlockEditorContext) => {
-    let courseVars: Variable<Course[]> = {
-      name: 'Courses',
-      value: [],
-      description: 'List of courses from Canvas'
-    };
-  });
+    const courseProps = [
+      'id', 'sisCourseId', 'uuid', 'integrationId', 'sisImportId', 'name', 'courseCode', 'originalName', 'workflowState', 'accountId', 'rootAccountId', 'enrollmentTermId', 'gradingPeriods', 'gradingStandardId', 'gradePassbackSetting', 'createdAt', 'startAt', 'endAt', 'locale', 'enrollments', 'totalStudents', 'calendar', 'defaultView', 'syllabusBody', 'needsGradingCount', 'term', 'courseProgress', 'applyAssignmentGroupWeights', 'permissions', 'isPublic', 'isPublicToAuthUsers', 'publicSyllabus', 'publicSyllabusToAuth', 'publicDescription', 'storageQuotaMb', 'storageQuotaUsedMb', 'hideFinalGrades', 'license', 'allowStudentAssignmentEdits', 'allowWikiComments', 'allowStudentForumAttachments', 'openEnrollment', 'selfEnrollment', 'restrictEnrollmentsToCourseDates', 'courseFormat', 'accessRestrictedByDate', 'timeZone', 'blueprint', 'blueprintRestrictions', 'blueprintRestrictionsByObjectType', 'template'
+    ];
+
+    const options = courseProps.map(prop => ({
+      id: `courses.${prop}`,
+      img: canvas,
+      name: camelToTitleCase(prop),
+      value: `courses.${prop}`,
+    }));
+
+    context.setDisplayVariableGroups(prev => [
+      ...prev,
+      {
+        label: 'Canvas Courses',
+        options,
+      },
+    ]);
+  }
+});
 
 export const GetCanvasAssignments = createCanvasGetBlock({
   label: 'Get Assignments from Canvas',
   description: 'Sync assignments and due dates',
   onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => {
     getAllAssignments(data.token, data.domain).then(assignments => {
-      context.setEnvironmentVars(prev => prev)
+      const id = crypto.randomUUID();
+      const rv: RuntimeVariable<any[]> = { id, value: assignments };
+      context.setRuntimeVars(prev => ({ ...prev, [id]: rv }));
     });
   },
-  onAdd: 
 });
 
 export const GetCanvasAnnouncements = createCanvasGetBlock({

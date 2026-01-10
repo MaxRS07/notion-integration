@@ -1,20 +1,24 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { EditorBlock } from "./types";
-import { VariableGroup } from "../../models/shared/mapvar";
+import { VariableGroup, RuntimeVars } from "../../models/shared/mapvar";
 
 interface BlockRendererProps {
     block: EditorBlock;
     index: number;
     onUpdate: (data: any) => void;
-    environmentVars: Record<string, VariableGroup>;
-    setEnvironmentVars: Dispatch<SetStateAction<Record<string, VariableGroup>>>;
+    displayVariableGroups: VariableGroup[];
+    setDisplayVariableGroups: Dispatch<SetStateAction<VariableGroup[]>>;
+    runtimeVars: RuntimeVars;
+    setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
     block,
     onUpdate,
-    environmentVars,
-    setEnvironmentVars,
+    displayVariableGroups,
+    setDisplayVariableGroups,
+    runtimeVars,
+    setRuntimeVars,
 }) => {
     const { definition, data } = block;
     const error = definition.validate?.(data);
@@ -25,8 +29,10 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                 {definition.render({
                     data,
                     onChange: onUpdate,
-                    environmentVars,
-                    setEnvironmentVars,
+                    displayVariableGroups,
+                    setDisplayVariableGroups,
+                    runtimeVars,
+                    setRuntimeVars,
                 })}
             </div>
 

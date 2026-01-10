@@ -1,7 +1,7 @@
 import React, { DragEvent, Dispatch, SetStateAction } from "react";
 import { EditorBlock } from "./types";
 import { BlockRenderer } from "./BlockRenderer";
-import { VariableGroup } from "../../models/shared/mapvar";
+import { VariableGroup, RuntimeVars } from "../../models/shared/mapvar";
 
 interface FlowBlockProps {
     block: EditorBlock;
@@ -13,8 +13,10 @@ interface FlowBlockProps {
     onUpdate: (data: any) => void;
     onDragStart: (e: DragEvent) => void;
     onDragEnd: () => void;
-    environmentVars: Record<string, VariableGroup>;
-    setEnvironmentVars: Dispatch<SetStateAction<Record<string, VariableGroup>>>;
+    displayVariableGroups: VariableGroup[];
+    setDisplayVariableGroups: Dispatch<SetStateAction<VariableGroup[]>>;
+    runtimeVars: RuntimeVars;
+    setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
 }
 
 export const FlowBlock: React.FC<FlowBlockProps> = ({
@@ -26,8 +28,10 @@ export const FlowBlock: React.FC<FlowBlockProps> = ({
     onUpdate,
     onDragStart,
     onDragEnd,
-    environmentVars,
-    setEnvironmentVars,
+    displayVariableGroups,
+    setDisplayVariableGroups,
+    runtimeVars,
+    setRuntimeVars,
 }) => {
     return (
         <div
@@ -54,8 +58,10 @@ export const FlowBlock: React.FC<FlowBlockProps> = ({
                         block={block}
                         index={0}
                         onUpdate={onUpdate}
-                        environmentVars={environmentVars}
-                        setEnvironmentVars={setEnvironmentVars}
+                        displayVariableGroups={displayVariableGroups}
+                        setDisplayVariableGroups={setDisplayVariableGroups}
+                        runtimeVars={runtimeVars}
+                        setRuntimeVars={setRuntimeVars}
                     />
                 )}
             </div>

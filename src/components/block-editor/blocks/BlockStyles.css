@@ -390,12 +390,34 @@
 
 .variable-inline-block {
   display: inline-block;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
   font-size: 12px;
   color: var(--accent-blue);
+}
+.variable-inline-block img {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: text-bottom;
+}
+.mapping-input[contenteditable="true"] {
+  min-height: 36px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.2s;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+}
+.mapping-input[contenteditable="true"]:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.06);
 }
 
 .variable-inline-block img {

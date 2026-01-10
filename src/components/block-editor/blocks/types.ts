@@ -1,6 +1,6 @@
 import { JSX, Dispatch, SetStateAction } from "react";
 import { NotionType } from "../../../models/notion/types";
-import { VariableGroup } from "../../../models/shared/mapvar";
+import { VariableGroup, RuntimeVars } from "../../../models/shared/mapvar";
 
 export enum BlockType {
     GET = "get",
@@ -8,12 +8,16 @@ export enum BlockType {
     FUNCTION = "function",
 }
 export interface BlockEditorContext {
-    environmentVars: Record<string, VariableGroup>,
-    setEnvironmentVars: Dispatch<SetStateAction<Record<string, VariableGroup>>>;
+    // display groups used by renderers (pickers, overlays)
+    displayVariableGroups: VariableGroup[];
+    setDisplayVariableGroups: Dispatch<SetStateAction<VariableGroup[]>>;
+    // runtime vars are populated at run-time and are separate from display vars
+    runtimeVars: RuntimeVars;
+    setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
 }
 export interface BlockRuntimeContext {
-    runtimeVars: Record<string, any>,
-    setRuntimeVars: Dispatch<SetStateAction<Record<string, any>>>;
+    runtimeVars: RuntimeVars;
+    setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
 }
 
 export interface BlockDefinition<TData = any> {
@@ -41,8 +45,12 @@ export interface BlockRenderProps<TData> {
     data: TData;
     onChange: (data: TData) => void;
     disabled?: boolean;
-    environmentVars: Record<string, VariableGroup>;
-    setEnvironmentVars: Dispatch<SetStateAction<Record<string, VariableGroup>>>;
+    // display groups for pickers / overlays
+    displayVariableGroups: VariableGroup[];
+    setDisplayVariableGroups: Dispatch<SetStateAction<VariableGroup[]>>;
+    // runtime vars available for preview or other render-time needs
+    runtimeVars: RuntimeVars;
+    setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
 }
 
 export const pollIntervals = [

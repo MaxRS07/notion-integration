@@ -1,23 +1,27 @@
-import { Variable } from "lucide-react";
 import { NotionType } from "../notion/types";
 
-export interface DisplayVariableGroup {
-    label: string;
-    variables: Record<string, DisplayVariable>;
-}
-export interface DisplayVariable {
+// A variable option shown in pickers (display layer)
+export interface VariableOption {
     id: string;
     name: string;
+    value?: string;
+    dataType?: NotionType;
     description?: string;
     icon?: string;
     img?: string;
 }
-export interface Variable<T> {
-    name: string;
+
+// A group of display variables used by the UI when constructing flows
+export interface VariableGroup {
+    label: string;
+    options: VariableOption[];
+}
+
+// Runtime variable stored when the flow runs
+export interface RuntimeVariable<T = any> {
+    id: string;
     value: T;
 }
 
-export interface VariableGroup {
-    label: string;
-    variables: Record<string, Variable<any>>;
-}
+// Helper map of runtime variables
+export type RuntimeVars = Record<string, RuntimeVariable<any>>;
