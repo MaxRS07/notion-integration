@@ -1,4 +1,4 @@
-import React, { useState, DragEvent } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BLOCKS } from "./blocks/registry";
 import { BlockSidebar } from "./BlockSidebar";
 import { BlockHeader } from "./EditorHeader";
@@ -6,6 +6,8 @@ import { BlockFlow } from "./Flow";
 import { BlockData, EditorBlock } from "./types";
 import "./BlockEditor.css";
 import { VariableGroup, RuntimeVars } from "../../models/shared/mapvar";
+import { BlockRuntimeContext } from "./blocks";
+import { FlaskConical } from "lucide-react";
 
 interface BlockEditorProps {
   initialBlocks?: BlockData[];
@@ -20,37 +22,70 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
   onSave,
   onCancel,
 }) => {
-  const [blocks, setBlocks] = useState<EditorBlock[]>(() =>
-    initialBlocks.map(b => {
-      const def = BLOCKS[b.type];
-      return {
-        id: crypto.randomUUID(),
-        type: b.type,
-        definition: def,
-        data: b.data ?? def.defaultData,
-      };
-    })
-  );
+  /* ---------------- state ---------------- */
 
+  const [blocks, setBlocks] = useState<EditorBlock[]>([]);
   const [actionName, setActionName] = useState(initialActionName);
   const [editingName, setEditingName] = useState(false);
-
-  const [draggedType, setDraggedType] = useState<string | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
-  const [dropIndex, setDropIndex] = useState<number | null>(null);
-
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
-  // display variable groups used by pickers
   const [displayVariableGroups, setDisplayVariableGroups] = useState<VariableGroup[]>([]);
-
-  // runtime variables populated when the flow runs
   const [runtimeVars, setRuntimeVars] = useState<RuntimeVars>({});
+
+  const [running, setRunning] = useState(false);
+
+  /* ---------------- refs ---------------- */
+
+  const flowRef = useRef<HTMLDivElement | null>(null);
+  const blockRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  /* ---------------- helpers ---------------- */
+
+  const handleRun = async () => {
+    setRunning(true);
+    const context: BlockRuntimeContext = {
+      runtimeVars: runtimeVars,
+      setRuntimeVars: setRuntimeVars
+    }
+    for (const block of blocks) {
+      await block.definition.onRun(block.data, context)
+    }
+    setRunning(false)
+  }
+
+  const isInsideFlow = (x: number, y: number) => {
+    const rect = flowRef.current?.getBoundingClientRect();
+    if (!rect) return false;
+
+    return (
+      x >= rect.left &&
+      x <= rect.right &&
+      y >= rect.top &&
+      y <= rect.bottom
+    );
+  };
+
+  const getInsertIndexFromY = (clientY: number): number => {
+    const entries = Array.from(blockRefs.current.values());
+
+    for (let i = 0; i < entries.length; i++) {
+      const rect = entries[i].getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+
+      if (clientY < midpoint) {
+        return i;
+      }
+    }
+
+    return entries.length;
+  };
 
   /* ---------------- block ops ---------------- */
 
   const addBlock = (cat: string, type: string, index?: number) => {
     const def = BLOCKS[cat][type];
+
     const block: EditorBlock = {
       id: crypto.randomUUID(),
       type,
@@ -58,7 +93,15 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       data: def.defaultData,
     };
 
-    block.definition.onAdd?.(block.data, { displayVariableGroups, setDisplayVariableGroups, runtimeVars, setRuntimeVars });
+    const insertIndex = index ?? blocks.length;
+
+    block.definition.onAdd?.(block.data, {
+      displayVariableGroups,
+      setDisplayVariableGroups,
+      runtimeVars,
+      setRuntimeVars,
+      blockIndex: insertIndex,
+    });
 
     setBlocks(prev =>
       index === undefined
@@ -71,24 +114,23 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
     setBlocks(prev => prev.map(b => (b.id === id ? { ...b, data } : b)));
 
   const removeBlock = (id: string) => {
+    const index = blocks.findIndex(b => b.id === id);
+    const block = blocks[index];
+
     setBlocks(prev => prev.filter(b => b.id !== id));
 
-    const block = blocks.find(b => b.id === id);
-    block?.definition.onRemove?.(block.data, { displayVariableGroups, setDisplayVariableGroups, runtimeVars, setRuntimeVars });
+    block?.definition.onRemove?.(block.data, {
+      displayVariableGroups,
+      setDisplayVariableGroups,
+      runtimeVars,
+      setRuntimeVars,
+      blockIndex: index,
+    });
 
     setCollapsed(prev => {
       const next = new Set(prev);
       next.delete(id);
       return next;
-    });
-  };
-
-  const moveBlock = (from: number, to: number) => {
-    setBlocks(prev => {
-      const copy = [...prev];
-      const [moved] = copy.splice(from, 1);
-      copy.splice(to, 0, moved);
-      return copy;
     });
   };
 
@@ -98,28 +140,6 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-
-  /* ---------------- drag & drop ---------------- */
-
-  const onDragOver = (e: DragEvent, index: number) => {
-    e.preventDefault();
-    setDropIndex(index);
-  };
-
-  const onDrop = (e: DragEvent, index: number) => {
-    e.preventDefault();
-
-    if (draggedType) {
-      addBlock(draggedType, index);
-    } else if (draggedId) {
-      const from = blocks.findIndex(b => b.id === draggedId);
-      if (from !== -1 && from !== index) moveBlock(from, index);
-    }
-
-    setDraggedType(null);
-    setDraggedId(null);
-    setDropIndex(null);
-  };
 
   /* ---------------- save ---------------- */
 
@@ -135,14 +155,30 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       actionName.trim() || "Untitled Action"
     );
 
+  /* ---------------- drag from sidebar ---------------- */
+
+  const handleSidebarDragEnd = (
+    event: React.DragEvent,
+    cat: string,
+    type: string
+  ) => {
+    event.preventDefault();
+
+    const { clientX, clientY } = event;
+
+    if (!isInsideFlow(clientX, clientY)) return;
+
+    const index = getInsertIndexFromY(clientY);
+    addBlock(cat, type, index);
+  };
+
   /* ---------------- render ---------------- */
 
   return (
     <div className="block-editor">
       <BlockSidebar
         onAdd={addBlock}
-        onDragStart={setDraggedType}
-        onDragEnd={() => setDraggedType(null)}
+        onDragEnd={handleSidebarDragEnd}
       />
 
       <div className="block-editor-main">
@@ -150,6 +186,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
           name={actionName}
           isEditing={editingName}
           canSave={canSave}
+          running={running}
           onNameChange={setActionName}
           onStartEdit={() => setEditingName(true)}
           onFinishEdit={() => setEditingName(false)}
@@ -159,28 +196,36 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
           }}
           onSave={handleSave}
           onCancel={onCancel}
+          onRun={handleRun}
+          onStop={() => { }}
         />
 
-        <BlockFlow
-          blocks={blocks}
-          collapsed={collapsed}
-          draggedId={draggedId}
-          dropIndex={dropIndex}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
-          onBlockDragStart={(e, id) => {
-            setDraggedId(id);
-            e.dataTransfer.effectAllowed = "move";
-          }}
-          onBlockDragEnd={() => setDraggedId(null)}
-          onUpdateBlock={updateBlock}
-          onRemoveBlock={removeBlock}
-          onToggleCollapse={toggleCollapse}
-          displayVariableGroups={displayVariableGroups}
-          setDisplayVariableGroups={setDisplayVariableGroups}
-          runtimeVars={runtimeVars}
-          setRuntimeVars={setRuntimeVars}
-        />
+        <div
+          ref={flowRef}
+          className="block-flow-container"
+        >
+          <BlockFlow
+            blocks={blocks}
+            collapsed={collapsed}
+            draggedId={draggedId}
+            registerBlockRef={(id, el) => {
+              if (el) blockRefs.current.set(id, el);
+              else blockRefs.current.delete(id);
+            }}
+            onBlockDragStart={(e, id) => {
+              setDraggedId(id);
+              e.dataTransfer.effectAllowed = "move";
+            }}
+            onBlockDragEnd={() => setDraggedId(null)}
+            onUpdateBlock={updateBlock}
+            onRemoveBlock={removeBlock}
+            onToggleCollapse={toggleCollapse}
+            displayVariableGroups={displayVariableGroups}
+            setDisplayVariableGroups={setDisplayVariableGroups}
+            runtimeVars={runtimeVars}
+            setRuntimeVars={setRuntimeVars}
+          />
+        </div>
       </div>
     </div>
   );

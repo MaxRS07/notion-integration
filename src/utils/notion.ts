@@ -19,6 +19,16 @@ export const getPageList = async (token: String, query: String, max_pages?: numb
         return null;
     }
 }
+export const addDatabaseEntry = async (token: String, databaseId: String, properties: any, children?: any[], icon?: any, cover?: any): Promise<boolean> => {
+    try {
+        const result = await invoke<boolean>("add_database_entry", { token: token, databaseId: databaseId, properties: properties, children: children, icon: icon, cover: cover });
+        console.log(result);
+        return result;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+}
 export const NotionColorMap = {
     default: {
         light: { background: "#FFFFFF", text: "#373530" },

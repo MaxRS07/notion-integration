@@ -7,9 +7,6 @@ interface BlockFlowProps {
     blocks: EditorBlock[];
     collapsed: Set<string>;
     draggedId: string | null;
-    dropIndex: number | null;
-    onDragOver: (e: DragEvent, index: number) => void;
-    onDrop: (e: DragEvent, index: number) => void;
     onBlockDragStart: (e: DragEvent, id: string) => void;
     onBlockDragEnd: () => void;
     onUpdateBlock: (id: string, data: any) => void;
@@ -25,9 +22,6 @@ export const BlockFlow: React.FC<BlockFlowProps> = ({
     blocks,
     collapsed,
     draggedId,
-    dropIndex,
-    onDragOver,
-    onDrop,
     onBlockDragStart,
     onBlockDragEnd,
     onUpdateBlock,
@@ -42,12 +36,6 @@ export const BlockFlow: React.FC<BlockFlowProps> = ({
         <div className="block-flow">
             {blocks.map((block, index) => (
                 <React.Fragment key={block.id}>
-                    <div
-                        className={`drop-zone ${dropIndex === index ? "active" : ""}`}
-                        onDragOver={e => onDragOver(e, index)}
-                        onDrop={e => onDrop(e, index)}
-                    />
-
                     <FlowBlock
                         block={block}
                         index={index}
@@ -65,13 +53,6 @@ export const BlockFlow: React.FC<BlockFlowProps> = ({
                     />
                 </React.Fragment>
             ))}
-
-            <div
-                className={`drop-zone ${dropIndex === blocks.length ? "active" : ""
-                    }`}
-                onDragOver={e => onDragOver(e, blocks.length)}
-                onDrop={e => onDrop(e, blocks.length)}
-            />
         </div>
     );
 };

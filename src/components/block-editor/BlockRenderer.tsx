@@ -10,6 +10,7 @@ interface BlockRendererProps {
     setDisplayVariableGroups: Dispatch<SetStateAction<VariableGroup[]>>;
     runtimeVars: RuntimeVars;
     setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
+    blockIndex: number;
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -19,6 +20,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     setDisplayVariableGroups,
     runtimeVars,
     setRuntimeVars,
+    blockIndex,
 }) => {
     const { definition, data } = block;
     const error = definition.validate?.(data);
@@ -33,6 +35,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                     setDisplayVariableGroups,
                     runtimeVars,
                     setRuntimeVars,
+                    blockIndex,
                 })}
             </div>
 

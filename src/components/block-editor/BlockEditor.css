@@ -154,12 +154,29 @@
 
 /* Flow Area */
 .block-flow {
+  height: 100%;
   flex: 1;
   padding: 24px 32px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 24px;
+}
+
+.block-flow-container {
+  flex: 1;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.block-flow-container.drag-over {
+  background: rgba(0, 122, 255, 0.04);
+}
+
+.block-flow-container.drag-over .block-flow {
+  outline: 2px dashed var(--accent-blue);
+  outline-offset: -1px;
+  border-radius: var(--radius-lg);
 }
 
 .flow-empty-state {
@@ -248,6 +265,36 @@
   justify-content: center;
   transition: all 0.2s ease;
 }
+.block-run-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.block-run-btn img {
+  width: 14px;
+  height: 14px;
+  filter: invert(100%);
+  pointer-events: none;
+}
+
+.block-run-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.block-run-btn:active {
+  transform: scale(0.95);
+}
 
 .block-control-btn:hover {
   background: var(--bg-tertiary);
@@ -303,7 +350,6 @@
 }
 
 .block-title {
-  margin: 0 0 4px 0;
   font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);

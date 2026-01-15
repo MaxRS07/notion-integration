@@ -4,10 +4,11 @@ import { BlockDefinition, BlockRenderProps, BlockType, BlockRuntimeContext } fro
 import { NotionDestination } from '../../wizard/DestinationSelector';
 import notionIcon from '../../../assets/icons/notion.svg';
 import './BlockStyles.css';
-import { getPageList } from '../../../utils/notion';
+import { addDatabaseEntry, getPageList } from '../../../utils/notion';
 import { storage } from '../../../utils/storage';
 import { VariablePickerOverlay } from '../../wizard/VariablePickerOverlay';
 import { TokenizedInput } from './TokenizedInput';
+import { DatabaseColumn } from '../../../models/notion/types';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -15,11 +16,13 @@ import { TokenizedInput } from './TokenizedInput';
 
 interface NotionActionData {
   // store the raw destination data (serializable) so it persists correctly
-  destination?: any;
+  destination?: NotionDestination;
   // when present these may be NotionDestination instances used for selection UI
   notionDestinations?: NotionDestination[] | any[];
-  // column mappings: map column name to user-provided value
-  columnMappings?: Record<string, string>;
+  // properties: map column name to { column: DatabaseColumn, value: string }
+  properties?: Record<string, { column: DatabaseColumn; value: string }>;
+
+  destinationType?: 'page' | 'data_source'
 }
 
 /* ------------------------------------------------------------------ */
@@ -30,9 +33,9 @@ function NotionDestinationPicker({
   data,
   onChange,
   disabled,
-  destinationFilter,
   displayVariableGroups,
-}: BlockRenderProps<NotionActionData> & { destinationFilter?: 'page' | 'data_source' }) {
+  blockIndex,
+}: BlockRenderProps<NotionActionData>) {
   const [searchQuery, setSearchQuery] = useState('');
   const [variableQuery, setVariableQuery] = useState('');
   const [showDestinations, setShowDestinations] = useState(false);
@@ -43,24 +46,17 @@ function NotionDestinationPicker({
   const [fieldFocused, setFieldFocused] = useState<HTMLElement | null>(null);
   const tokenFieldRefs = useRef<Record<string, React.RefObject<any>>>({});
 
-  useEffect(() => {
-    console.log("variable groups updated:", displayVariableGroups);
-  }, []);
-  const updateDestinations = (filter?: 'page' | 'data_source') => {
-    const effectiveFilter = filter ?? destinationFilter;
+  const updateDestinations = () => {
     getPageList(storage.getSettings().notionToken, '', 100).then(pages => {
-      let pageList = pages
-        ? effectiveFilter
-          ? pages.results.filter(p => {
-            return p.object === effectiveFilter;
-          })
-          : pages.results
+      let pageList = pages ? data.destinationType ? pages.results.filter(p => {
+        return p.object === data.destinationType;
+      })
+        : pages.results
         : [];
       setDestinations(pageList.map(p => new NotionDestination(p)));
     });
   };
 
-  // tokenized behavior moved to TokenizedField component
   const filtered = useMemo(() => {
     return destinations
       .filter(d =>
@@ -129,8 +125,21 @@ function NotionDestinationPicker({
                 key={dest.getId()}
                 className="destination-item"
                 onClick={() => {
+                  // initialize properties using destination columns
+                  const initialProperties: Record<string, { column: DatabaseColumn; value: string }> = {};
+                  dest.getColumns().forEach((col) => {
+                    initialProperties[col.name] = {
+                      column: col,
+                      value: '',
+                    };
+                  });
+
                   // store the raw destination data so it's serializable
-                  onChange({ ...data, destination: dest.data });
+                  onChange({
+                    ...data,
+                    destination: dest,
+                    properties: initialProperties,
+                  });
                   setShowDestinations(false);
                   setSearchQuery('');
                 }}
@@ -163,16 +172,23 @@ function NotionDestinationPicker({
                         <TokenizedInput
                           ref={tokenFieldRefs.current[col.name]}
                           onChange={(serialized: string) => {
+                            const newProperties = {
+                              ...data.properties,
+                              [col.name]: {
+                                column: col,
+                                value: serialized,
+                              },
+                            };
                             onChange({
                               ...data,
-                              columnMappings: {
-                                ...data.columnMappings,
-                                [col.name]: serialized,
-                              },
+                              properties: newProperties,
                             });
-                            let lastWord = serialized.split(" ").pop() || "";
-                            if (serialized.endsWith("}")) lastWord = "";
-                            setVariableQuery(lastWord);
+                            var lastWord = serialized.split(" ").pop() || "";
+                            const varIndex = lastWord.lastIndexOf("}}")
+                            if (varIndex !== -1) {
+                              lastWord = lastWord.substring(varIndex + 2);
+                            }
+                            setVariableQuery(lastWord)
                           }}
                           disabled={disabled}
                           placeholder={`${col.description || "Value for " + col.name}`}
@@ -206,6 +222,7 @@ function NotionDestinationPicker({
                 query={variableQuery}
                 variableGroups={displayVariableGroups}
                 inputElement={fieldFocused ?? undefined}
+                blockIndex={blockIndex}
               />
             </form>
           ) : (
@@ -224,7 +241,6 @@ function NotionDestinationPicker({
 function NotionActionRenderer(props: {
   title: string;
   description: string;
-  destinationFilter?: 'page' | 'data_source';
   renderProps: BlockRenderProps<NotionActionData>;
 }) {
   const { title, description, renderProps } = props;
@@ -240,7 +256,7 @@ function NotionActionRenderer(props: {
       </div>
 
       <div className="block-fields">
-        <NotionDestinationPicker {...renderProps} destinationFilter={props.destinationFilter} />
+        <NotionDestinationPicker {...renderProps} />
       </div>
     </div>
   );
@@ -264,22 +280,30 @@ function createNotionActionBlock(config: {
     defaultData: {
       destination: undefined,
       notionDestinations: [],
-      columnMappings: {},
+      properties: {},
+      destinationType: config.destinationFilter,
     },
     onRun: config.onRun,
 
-    render: (props: BlockRenderProps<NotionActionData>) => (
-      <NotionActionRenderer
-        title={config.label}
-        description={config.description}
-        destinationFilter={config.destinationFilter}
-        renderProps={props}
-      />
-    ),
+    render: (props: BlockRenderProps<NotionActionData>) => {
+      // Ensure destinationType is set from the config filter
+      const dataWithFilter = {
+        ...props.data,
+        destinationType: config.destinationFilter || props.data.destinationType,
+      };
+
+      return (
+        <NotionActionRenderer
+          title={config.label}
+          description={config.description}
+          renderProps={{ ...props, data: dataWithFilter }}
+        />
+      );
+    },
 
     summarize: (data) =>
       data.destination
-        ? `${config.label} → ${new NotionDestination(data.destination).getName()}`
+        ? `${config.label} → ${data.destination.getName()}`
         : 'Not configured',
 
     validate: (data) => {
@@ -297,7 +321,8 @@ export const NotionAddBlock = createNotionActionBlock({
   label: 'Add Block to Notion',
   description: 'Add content blocks to a Notion page',
   destinationFilter: 'page',
-  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => { }
+  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => {
+  }
 });
 
 export const NotionEditPage = createNotionActionBlock({
@@ -324,7 +349,80 @@ export const NotionAddDatabaseEntry = createNotionActionBlock({
   label: 'Add Database Entry in Notion',
   description: 'Add a new row to a Notion database',
   destinationFilter: 'data_source',
-  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => { }
+  onRun: async (data: NotionActionData, context: BlockRuntimeContext) => {
+    if (!data.destination || !data.properties) return;
+
+    const notionProperties: Record<string, any> = {};
+
+    Object.entries(data.properties).forEach(([colName, { column, value }]) => {
+      if (!value) return;
+
+      if (value == "") {
+        notionProperties[colName] = null;
+      }
+
+      switch (column.type) {
+        case 'title':
+          notionProperties[colName] = {
+            title: [
+              {
+                text: {
+                  content: value,
+                },
+              },
+            ],
+          };
+          break;
+
+        case 'rich_text':
+          notionProperties[colName] = {
+            rich_text: [
+              {
+                text: {
+                  content: value,
+                },
+              },
+            ],
+          };
+          break;
+
+        case 'select':
+          notionProperties[colName] = {
+            select: {
+              name: value,
+            },
+          };
+          break;
+
+        case 'multi_select':
+          notionProperties[colName] = {
+            multi_select: value
+              .split(',')
+              .map(v => v.trim())
+              .filter(Boolean)
+              .map(name => ({ name })),
+          };
+          break;
+
+        default:
+          notionProperties[colName] = {
+            rich_text: [
+              {
+                text: {
+                  content: value,
+                },
+              },
+            ],
+          };
+      }
+    });
+
+    await addDatabaseEntry(
+      storage.getSettings().notionToken,
+      data.destination.getId(),
+      notionProperties
+    );
+  }
 });
 
 export const NotionActionBlocks = [

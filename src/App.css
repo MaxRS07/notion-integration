@@ -2058,6 +2058,12 @@ input:checked + .toggle-slider:before {
   color: var(--text-tertiary);
 }
 
+.mapping-input-placeholder {
+  font-size: 13px;
+  color: var(--text-primary);
+  opacity: 0.33;
+}
+
 .tokenized-input-wrapper {
   width: 100%;
   padding: 12px 16px;

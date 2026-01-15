@@ -1,4 +1,5 @@
 use crate::web::error::AppError;
+use crate::web::notion::models::page_request::ParentType;
 use crate::web::notion::models::{page_query, user};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tauri_plugin_http::reqwest::{
@@ -225,5 +226,54 @@ impl NotionClient {
             "query": query
         });
         self.post("/search", body).await
+    }
+    pub async fn create_page(
+        &self,
+        parent_type: ParentType,
+        parent_id: &str,
+        properties: serde_json::Value,
+        children: Option<Vec<serde_json::Value>>,
+        icon: Option<serde_json::Value>,
+        cover: Option<serde_json::Value>,
+    ) -> Result<bool, AppError>
+    where
+        serde_json::Value: serde::de::DeserializeOwned,
+    {
+        // Build the parent object
+        let mut parent_map = serde_json::Map::new();
+        parent_map.insert(
+            "type".to_string(),
+            serde_json::Value::String(parent_type.to_string()),
+        );
+        parent_map.insert(
+            parent_type.to_string(),
+            serde_json::Value::String(parent_id.to_string()),
+        );
+
+        // Start building the request body
+        let mut body = serde_json::json!({
+            "parent": serde_json::Value::Object(parent_map),
+            "properties": properties,
+        });
+
+        // Optional icon
+        if let Some(icon_obj) = icon {
+            body["icon"] = icon_obj;
+        }
+
+        // Optional cover
+        if let Some(cover_obj) = cover {
+            body["cover"] = cover_obj;
+        }
+
+        // Optional children blocks — content inside the new page
+        if let Some(children_vec) = children {
+            body["children"] = serde_json::Value::Array(children_vec);
+        }
+
+        // Perform the POST /pages call
+        let result = self.post("/pages", body).await?;
+
+        Ok(result)
     }
 }

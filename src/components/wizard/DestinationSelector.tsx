@@ -97,7 +97,6 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
   const [selectedDataType, setSelectedDataType] = useState<CanvasDataType | ''>(initialSelectedDataType);
   const [selectedPollType, setSelectedPollType] = useState<PollingInterval | ''>('30');
 
-  const [actionName, setActionName] = useState('');
   const [destinationQuery, setDestinationQuery] = useState('');
   const [actionQuery, setActionQuery] = useState('');
   const [dataQuery, setDataQuery] = useState('');
@@ -140,7 +139,7 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
       <div className="destination-selector" style={{ maxWidth: '900px', marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div className='form-group'>
           <label className='form-label'>Action Name</label>
-          <input className='form-input' type='text' placeholder='New Action' onChange={(e) => setActionName(e.target.value)}></input>
+          <input className='form-input' type='text' placeholder='New Action' onChange={(e) => {/*setActionName(e.target.value)*/ }}></input>
         </div>
       </div>
       <SearchDropdown

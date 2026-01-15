@@ -19,6 +19,8 @@ export interface VariablePickerOverlayProps {
     variableGroups: VariableGroup[];
     // can be an <input> or a contenteditable element
     inputElement?: HTMLElement | HTMLInputElement;
+    // block index to filter variables from previous blocks only
+    blockIndex?: number;
 }
 
 export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
@@ -28,6 +30,7 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
     query,
     variableGroups,
     inputElement,
+    blockIndex,
 }) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const overlayRef = useRef<HTMLDivElement>(null);
@@ -60,13 +63,17 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
         }
     }, [selectedIndex]);
 
-    // Filter variables based on search
+    // Filter variables based on search and block index
     const filteredGroups = variableGroups
         .map(group => ({
             ...group,
-            options: group.options.filter(opt =>
-                opt.name.replace(" ", "").toLowerCase().includes((query ?? '').toLowerCase().replace(" ", ""))
-            ),
+            options: group.options.filter(opt => {
+                // Filter by search query
+                const matchesQuery = opt.name.replace(" ", "").toLowerCase().includes((query ?? '').toLowerCase().replace(" ", ""));
+                // Filter by block index - only show variables from earlier blocks
+                const isAccessible = blockIndex === undefined || opt.sourceBlockIndex === undefined || opt.sourceBlockIndex < blockIndex;
+                return matchesQuery && isAccessible;
+            }),
         }))
         .filter(group => group.options.length > 0);
 

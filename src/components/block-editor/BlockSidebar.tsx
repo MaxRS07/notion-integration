@@ -3,15 +3,15 @@ import { BLOCKS } from "./blocks/registry";
 
 interface BlockSidebarProps {
     onAdd: (category: string, type: string) => void;
-    onDragStart: (type: string) => void;
-    onDragEnd: () => void;
+    onDragEnd: (dragEvent: React.DragEvent, cat: string, type: string) => void;
 }
 
 export const BlockSidebar: React.FC<BlockSidebarProps> = ({
     onAdd,
-    onDragStart,
     onDragEnd,
 }) => {
+    const [draggingBlock, setDraggingBlock] = React.useState<{ category: string; type: string } | null>(null);
+
     return (
         <div className="block-sidebar">
             <h3 className="sidebar-title">Blocks</h3>
@@ -24,8 +24,8 @@ export const BlockSidebar: React.FC<BlockSidebarProps> = ({
                                 key={type}
                                 className="sidebar-block"
                                 draggable
-                                onDragStart={() => onDragStart(type)}
-                                onDragEnd={onDragEnd}
+                                onDragStart={() => setDraggingBlock({ category: cat, type })}
+                                onDragEnd={(e) => onDragEnd(e, draggingBlock!.category, draggingBlock!.type)}
                                 onDoubleClick={() => onAdd(cat, type)}
                             >
                                 <div className="sidebar-block-icon">

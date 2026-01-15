@@ -21,6 +21,7 @@ interface FlowBlockProps {
 
 export const FlowBlock: React.FC<FlowBlockProps> = ({
     block,
+    index,
     isCollapsed,
     isDragging,
     onToggleCollapse,
@@ -62,6 +63,7 @@ export const FlowBlock: React.FC<FlowBlockProps> = ({
                         setDisplayVariableGroups={setDisplayVariableGroups}
                         runtimeVars={runtimeVars}
                         setRuntimeVars={setRuntimeVars}
+                        blockIndex={index}
                     />
                 )}
             </div>

@@ -7,7 +7,7 @@ use crate::web::{
     },
     notion::{
         client::NotionClient,
-        models::{page_query, user},
+        models::{page_query, page_request::ParentType, user},
     },
 };
 
@@ -59,10 +59,29 @@ async fn query_user_pages(
     NotionClient::new(token)
         .search_pages(query, maxPages)
         .await
-        .map_err(|e| {
-            println!("{}", e);
-            e.to_string()
-        })
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn add_database_entry(
+    token: String,
+    databaseId: String,
+    properties: serde_json::Value,
+    children: Option<Vec<serde_json::Value>>,
+    icon: Option<serde_json::Value>,
+    cover: Option<serde_json::Value>,
+) -> Result<bool, String> {
+    NotionClient::new(token)
+        .create_page(
+            ParentType::Database,
+            &databaseId,
+            properties,
+            children,
+            icon,
+            cover,
+        )
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -74,7 +93,8 @@ pub fn run() {
             get_assignments,
             validate_cavas_token,
             get_notion_user,
-            query_user_pages
+            query_user_pages,
+            add_database_entry
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

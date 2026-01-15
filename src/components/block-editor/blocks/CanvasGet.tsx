@@ -147,11 +147,10 @@ export const GetCanvasCourses = createCanvasGetBlock({
   label: 'Get Courses from Canvas',
   description: 'Import your enrolled courses from Canvas',
   onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => {
-    getUserCourses(data.token, data.domain).then(courses => {
-      const id = crypto.randomUUID();
-      const rv: RuntimeVariable<Course[]> = { id, value: courses };
-      context.setRuntimeVars(prev => ({ ...prev, [id]: rv }));
-    });
+    const courses = await getUserCourses(data.token, data.domain)
+    const id = crypto.randomUUID();
+    const rv: RuntimeVariable<Course[]> = { id, value: courses };
+    context.setRuntimeVars(prev => ({ ...prev, [id]: rv }));
   },
   onAdd: (data: CanvasTriggerData, context: BlockEditorContext) => {
     const courseProps = [
@@ -163,6 +162,7 @@ export const GetCanvasCourses = createCanvasGetBlock({
       img: canvas,
       name: camelToTitleCase(prop),
       value: `courses.${prop}`,
+      sourceBlockIndex: context.blockIndex,
     }));
 
     context.setDisplayVariableGroups(prev => [

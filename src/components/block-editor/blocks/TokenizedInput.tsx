@@ -163,7 +163,7 @@ export interface TokenizedInputHandle {
 interface TokenizedInputProps {
   placeholder?: string;
   disabled?: boolean;
-  onChange?: (value: String) => void;
+  onChange?: (value: string) => void;
   onFocus?: (el: React.FocusEvent<Element>) => void;
   onBlur?: () => void;
 }
@@ -174,10 +174,20 @@ interface TokenizedInputProps {
 
 export const TokenizedInput = forwardRef<TokenizedInputHandle, TokenizedInputProps>((props, ref) => {
   const { placeholder, disabled, onChange, onFocus, onBlur } = props;
+  const [focused, setFocused] = useState(false);
 
   const [editor] = useState(() =>
     withDeletableVariables(withVariables(withReact(createEditor())))
   );
+
+  const handleFocus = (el: React.FocusEvent<Element>) => {
+    setFocused(true);
+    onFocus?.(el);
+  }
+  const handleBlur = () => {
+    setFocused(false);
+    onBlur?.();
+  }
 
   const [value, setValue] = useState<Descendant[]>([
     {
@@ -192,6 +202,10 @@ export const TokenizedInput = forwardRef<TokenizedInputHandle, TokenizedInputPro
       ReactEditor.focus(editor);
     },
   }));
+
+  const isEmpty = value.length === 1 && value[0].type === 'paragraph' &&
+    (value[0] as ParagraphElement).children.length === 1 &&
+    ((value[0] as ParagraphElement).children[0] as CustomText).text === '';
 
   const renderElement = (props: RenderElementProps) => {
     const { attributes, children, element } = props;
@@ -222,7 +236,18 @@ export const TokenizedInput = forwardRef<TokenizedInputHandle, TokenizedInputPro
           </span>
         );
       default:
-        return <p {...attributes}>{children}</p>;
+        return (
+          <p {...attributes} style={{ position: 'relative' }}>
+            {!focused && isEmpty && placeholder && (
+              <span
+                className='mapping-input-placeholder'
+              >
+                {placeholder}
+              </span>
+            )}
+            {children}
+          </p>
+        );
     }
   };
 
@@ -230,7 +255,6 @@ export const TokenizedInput = forwardRef<TokenizedInputHandle, TokenizedInputPro
     <Slate
       editor={editor}
       initialValue={value}
-      value={value}
       onChange={(desc) => { setValue(desc); onChange?.(serializeValue(desc)); }}
     >
       <Editable
@@ -238,11 +262,10 @@ export const TokenizedInput = forwardRef<TokenizedInputHandle, TokenizedInputPro
         role="textbox"
         aria-multiline
         spellCheck
-        placeholder={placeholder}
         renderElement={renderElement}
         className='mapping-input mapping-field-input'
-        onFocus={(el) => onFocus?.(el)}
-        onBlur={() => onBlur?.()}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
     </Slate>
   );

@@ -9,6 +9,8 @@ export interface VariableOption {
     description?: string;
     icon?: string;
     img?: string;
+    // which block index produced this variable
+    sourceBlockIndex?: number;
 }
 
 // A group of display variables used by the UI when constructing flows

@@ -14,6 +14,8 @@ export interface BlockEditorContext {
     // runtime vars are populated at run-time and are separate from display vars
     runtimeVars: RuntimeVars;
     setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
+    // the index of the current block being edited
+    blockIndex?: number;
 }
 export interface BlockRuntimeContext {
     runtimeVars: RuntimeVars;
@@ -51,6 +53,8 @@ export interface BlockRenderProps<TData> {
     // runtime vars available for preview or other render-time needs
     runtimeVars: RuntimeVars;
     setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
+    // block index to filter variables from previous blocks only
+    blockIndex: number;
 }
 
 export const pollIntervals = [
