@@ -1,4 +1,5 @@
 use crate::web::error::AppError;
+use crate::web::notion::models::page_query::ResultObject;
 use crate::web::notion::models::page_request::ParentType;
 use crate::web::notion::models::{page_query, user};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -119,6 +120,7 @@ impl NotionClient {
         }
         serde_json::from_str::<T>(&text).map_err(|e| {
             println!("{}", e);
+            println!("{}", &text);
             AppError::Parse(e.to_string())
         })
     }
@@ -235,7 +237,7 @@ impl NotionClient {
         children: Option<Vec<serde_json::Value>>,
         icon: Option<serde_json::Value>,
         cover: Option<serde_json::Value>,
-    ) -> Result<bool, AppError>
+    ) -> Result<ResultObject, AppError>
     where
         serde_json::Value: serde::de::DeserializeOwned,
     {
@@ -272,7 +274,7 @@ impl NotionClient {
         }
 
         // Perform the POST /pages call
-        let result = self.post("/pages", body).await?;
+        let result = self.post::<ResultObject>("/pages", body).await?;
 
         Ok(result)
     }

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { VariableGroup, VariableOption } from '../../models/shared/mapvar';
+import { NotionColorMap } from '../../utils/notion';
 
 function lastIndexOf(str: string, match: (char: string) => boolean) {
     for (var i = str.length; i > 0; i--) {
@@ -154,6 +155,7 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
                             {group.options.map((option, optIdx) => {
                                 const globalIndex = currentOptionIndex++;
                                 const isSelected = globalIndex === selectedIndex;
+                                const bgColor = option.bgColor ? NotionColorMap[option.bgColor]['light']['text'] : null
 
                                 return (
                                     <button
@@ -164,7 +166,7 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
                                     >
                                         <div>
                                             {option.img ? <img src={option.img}></img> : option.icon ? <span className="variable-option-name">{option.icon}</span> : null}
-                                            <span className="variable-option-name">
+                                            <span className={"variable-option-name" + (bgColor ? " color" : '')} style={{ backgroundColor: bgColor }}>
                                                 {option.name}
                                             </span>
                                         </div>

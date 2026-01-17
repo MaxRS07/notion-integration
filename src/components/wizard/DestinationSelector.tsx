@@ -14,6 +14,10 @@ export class NotionDestination {
     return this.data.id ?? '';
   }
 
+  getParentId(): string {
+    return this.data.parent?.data_source_id ?? this.data.parent?.database_id ?? ""
+  }
+
   isDatasource(): boolean {
     return !this.isPage();
   }

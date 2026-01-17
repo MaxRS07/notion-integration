@@ -2222,6 +2222,10 @@ input:checked + .toggle-slider:before {
 .variable-option-name {
   font-weight: 500;
 }
+.variable-option-name.color {
+  padding: 2px 4px;
+  border-radius: 4px;
+}
 .variable-option img {
   width: 16px;
   height: 16px;

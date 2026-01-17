@@ -1,6 +1,7 @@
 // blocks/registry.ts
 import { GetCanvasAnnouncements, GetCanvasAssignments, GetCanvasCourses, GetCanvasGrades } from './CanvasGet';
 import { NotionAddBlock, NotionAddChildPage, NotionAddDatabaseEntry, NotionEditPage, NotionMakeComment } from './NotionBlock';
+import { LoggingBlock } from './ProgramBlock';
 import { BlockDefinition } from './types';
 
 export const BLOCKS: Record<string, Record<string, BlockDefinition>> = {
@@ -16,5 +17,8 @@ export const BLOCKS: Record<string, Record<string, BlockDefinition>> = {
         "Make Comment In Notion": NotionMakeComment,
         "Add Child Page In Notion": NotionAddChildPage,
         "Add Database Entry In Notion": NotionAddDatabaseEntry,
+    },
+    "Function": {
+        "Log Data To Console": LoggingBlock
     }
 } as const;

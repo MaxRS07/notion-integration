@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import User from "../models/notion/user"
+import User, { Result } from "../models/notion/user"
 import PageList from "../models/notion/page_query"
 
 export const getNotionUserInfo = async (token: string): Promise<User | null> => {
@@ -19,14 +19,13 @@ export const getPageList = async (token: String, query: String, max_pages?: numb
         return null;
     }
 }
-export const addDatabaseEntry = async (token: String, databaseId: String, properties: any, children?: any[], icon?: any, cover?: any): Promise<boolean> => {
+export const addDatabaseEntry = async (token: String, databaseId: String, properties: any, children?: any[], icon?: any, cover?: any): Promise<Result | null> => {
     try {
-        const result = await invoke<boolean>("add_database_entry", { token: token, databaseId: databaseId, properties: properties, children: children, icon: icon, cover: cover });
-        console.log(result);
+        const result = await invoke<Result>("add_database_entry", { token: token, databaseId: databaseId, properties: properties, children: children, icon: icon, cover: cover });
         return result;
     } catch (err) {
         console.log(err);
-        return false;
+        return null;
     }
 }
 export const NotionColorMap = {

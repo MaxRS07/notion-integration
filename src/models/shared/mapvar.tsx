@@ -9,6 +9,7 @@ export interface VariableOption {
     description?: string;
     icon?: string;
     img?: string;
+    bgColor?: string;
     // which block index produced this variable
     sourceBlockIndex?: number;
 }

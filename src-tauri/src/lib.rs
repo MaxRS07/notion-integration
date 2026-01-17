@@ -7,7 +7,11 @@ use crate::web::{
     },
     notion::{
         client::NotionClient,
-        models::{page_query, page_request::ParentType, user},
+        models::{
+            page_query::{self, ResultObject},
+            page_request::ParentType,
+            user,
+        },
     },
 };
 
@@ -70,7 +74,7 @@ async fn add_database_entry(
     children: Option<Vec<serde_json::Value>>,
     icon: Option<serde_json::Value>,
     cover: Option<serde_json::Value>,
-) -> Result<bool, String> {
+) -> Result<ResultObject, String> {
     NotionClient::new(token)
         .create_page(
             ParentType::Database,

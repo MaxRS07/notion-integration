@@ -69,6 +69,10 @@
   height: 24px;
 }
 
+.sidebar-block-icon.invert img {
+  filter: invert()
+}
+
 .sidebar-block-info {
   flex: 1;
   min-width: 0;
@@ -80,13 +84,11 @@
   font-size: 14px;
 }
 
-
-/* Main Editor Area */
 .block-editor-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;
 }
 
 /* Header Bar */
@@ -163,7 +165,10 @@
   gap: 24px;
 }
 
+
 .block-flow-container {
+  min-height: 0;
+  overflow-y: auto;
   flex: 1;
   position: relative;
   transition: all 0.2s ease;
@@ -365,7 +370,6 @@
 .block-fields {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 .block-empty-state {

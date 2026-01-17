@@ -6,9 +6,9 @@ import notionIcon from '../../../assets/icons/notion.svg';
 import './BlockStyles.css';
 import { addDatabaseEntry, getPageList } from '../../../utils/notion';
 import { storage } from '../../../utils/storage';
-import { VariablePickerOverlay } from '../../wizard/VariablePickerOverlay';
 import { TokenizedInput } from './TokenizedInput';
-import { DatabaseColumn } from '../../../models/notion/types';
+import { DatabaseColumn, NotionType } from '../../../models/notion/types';
+import { VariableGroup, VariableOption } from '../../../models/shared/mapvar';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -34,16 +34,15 @@ function NotionDestinationPicker({
   onChange,
   disabled,
   displayVariableGroups,
+  setDisplayVariableGroups,
   blockIndex,
 }: BlockRenderProps<NotionActionData>) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [variableQuery, setVariableQuery] = useState('');
   const [showDestinations, setShowDestinations] = useState(false);
   const [destinations, setDestinations] = useState<NotionDestination[]>(
     // ensure we have NotionDestination instances for the picker UI
     (data.notionDestinations || []).map((d: any) => (d instanceof NotionDestination ? d : new NotionDestination(d)))
   );
-  const [fieldFocused, setFieldFocused] = useState<HTMLElement | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const tokenFieldRefs = useRef<Record<string, React.RefObject<any>>>({});
 
   const updateDestinations = () => {
@@ -140,8 +139,6 @@ function NotionDestinationPicker({
                     destination: dest,
                     properties: initialProperties,
                   });
-                  setShowDestinations(false);
-                  setSearchQuery('');
                 }}
                 disabled={disabled}
               >
@@ -171,34 +168,24 @@ function NotionDestinationPicker({
                       return (
                         <TokenizedInput
                           ref={tokenFieldRefs.current[col.name]}
+                          value={data.properties?.[col.name]?.value ?? ''}
+                          disabled={disabled}
+                          placeholder={col.description || `Value for ${col.name}`}
+                          column={col}
+                          variableGroups={displayVariableGroups}
+                          setVariableGroups={setDisplayVariableGroups}
+                          blockIndex={blockIndex}
                           onChange={(serialized: string) => {
-                            const newProperties = {
-                              ...data.properties,
-                              [col.name]: {
-                                column: col,
-                                value: serialized,
-                              },
-                            };
                             onChange({
                               ...data,
-                              properties: newProperties,
+                              properties: {
+                                ...data.properties,
+                                [col.name]: {
+                                  column: col,
+                                  value: serialized,
+                                },
+                              },
                             });
-                            var lastWord = serialized.split(" ").pop() || "";
-                            const varIndex = lastWord.lastIndexOf("}}")
-                            if (varIndex !== -1) {
-                              lastWord = lastWord.substring(varIndex + 2);
-                            }
-                            setVariableQuery(lastWord)
-                          }}
-                          disabled={disabled}
-                          placeholder={`${col.description || "Value for " + col.name}`}
-                          onFocus={(el) => {
-                            const target = el.target as HTMLElement;
-                            target.dataset.fieldKey = col.name;
-                            setFieldFocused(target);
-                          }}
-                          onBlur={() => {
-                            setFieldFocused(null);
                           }}
                         />
                       );
@@ -206,24 +193,6 @@ function NotionDestinationPicker({
                   }
                 </div>
               ))}
-              <VariablePickerOverlay
-                isOpen={fieldFocused !== null}
-                onClose={() => { }}
-                onSelect={(variable) => {
-                  // delegate insertion to the focused tokenized field's imperative handle
-                  if (!fieldFocused) return;
-                  const key = fieldFocused.dataset.fieldKey;
-                  if (!key) return;
-                  const ref = tokenFieldRefs.current[key];
-                  if (ref && ref.current && typeof ref.current.insertVariable === 'function') {
-                    ref.current.insertVariable(variable);
-                  }
-                }}
-                query={variableQuery}
-                variableGroups={displayVariableGroups}
-                inputElement={fieldFocused ?? undefined}
-                blockIndex={blockIndex}
-              />
             </form>
           ) : (
             <div className="no-columns">No columns available</div>
@@ -352,6 +321,8 @@ export const NotionAddDatabaseEntry = createNotionActionBlock({
   onRun: async (data: NotionActionData, context: BlockRuntimeContext) => {
     if (!data.destination || !data.properties) return;
 
+    console.log(data.destination.getColumns())
+
     const notionProperties: Record<string, any> = {};
 
     Object.entries(data.properties).forEach(([colName, { column, value }]) => {
@@ -419,7 +390,7 @@ export const NotionAddDatabaseEntry = createNotionActionBlock({
 
     await addDatabaseEntry(
       storage.getSettings().notionToken,
-      data.destination.getId(),
+      data.destination.getParentId(),
       notionProperties
     );
   }
