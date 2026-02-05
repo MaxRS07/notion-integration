@@ -1,0 +1,51 @@
+/* Layout Components - App Structure */
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+}
+
+.content-area.full-width {
+  padding: 0;
+}
+
+.integration-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.integration-actions {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.integration-settings {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.home-page {
+  width: 100%;
+}
+
+.welcome-setup {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.app-settings {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px;
+}

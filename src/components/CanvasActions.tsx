@@ -179,7 +179,6 @@ export const CanvasActions: React.FC<CanvasActionsProps> = ({ settings, onAction
 
         {savedActions.length === 0 ? (
           <div className="automations-empty">
-            <div className="empty-icon">🎯</div>
             <h3 className="empty-title">No actions yet</h3>
             <p className="empty-description">
               Create your first action to start syncing Canvas data to Notion

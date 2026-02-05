@@ -1,6 +1,11 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import runIcon from '../../assets/icons/play.png'
 import stopIcon from '../../assets/icons/stop.png'
+
+const ICON_OPTIONS = [
+    '⚙️', '🔄', '📝', '📊', '🎯', '💾',
+    '🔗', '📧', '⏰', '✅', '❌', '🚀'
+];
 
 interface BlockHeaderProps {
     name: string;
@@ -32,13 +37,41 @@ export const BlockHeader: React.FC<BlockHeaderProps> = ({
     onCancel,
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
+    const [selectedIcon, setSelectedIcon] = useState(ICON_OPTIONS[0]);
+    const [showIconPicker, setShowIconPicker] = useState(false);
 
     return (
         <div className="block-editor-header">
             <div className="editor-header-left">
+                <div className="icon-selector-wrapper">
+                    <button
+                        className="icon-selector-btn"
+                        onClick={() => setShowIconPicker(!showIconPicker)}
+                        title="Select icon"
+                    >
+                        {selectedIcon}
+                    </button>
+                    {showIconPicker && (
+                        <div className="icon-picker">
+                            {ICON_OPTIONS.map((icon) => (
+                                <button
+                                    key={icon}
+                                    className={`icon-option ${icon === selectedIcon ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setSelectedIcon(icon);
+                                        setShowIconPicker(false);
+                                    }}
+                                >
+                                    {icon}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
                 {isEditing ? (
                     <input
-                        className="form-input"
+                        className="editor-name-input"
                         ref={inputRef}
                         value={name}
                         onChange={e => onNameChange(e.target.value)}

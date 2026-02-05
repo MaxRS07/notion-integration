@@ -1,23 +1,14 @@
 import React from 'react';
-import { IntegrationType } from '../types';
 import settingsIcon from '../assets/icons/settings.svg';
-import canvas from "../assets/icons/canvas.svg"
+
+type CurrentPage = 'home' | 'app-settings';
 
 interface SidebarProps {
-  currentIntegration: IntegrationType | 'app-settings';
-  onSelectIntegration: (integration: IntegrationType | 'app-settings') => void;
+  currentPage: CurrentPage;
+  onSelectPage: (page: CurrentPage) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentIntegration, onSelectIntegration }) => {
-  const integrations = [
-    {
-      id: 'canvas' as IntegrationType,
-      name: 'Canvas LMS',
-      icon: canvas,
-      description: 'Sync courses and assignments',
-    },
-  ];
-
+export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onSelectPage }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -38,28 +29,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentIntegration, onSelectIn
       </div>
 
       <div className="sidebar-section">
-        <div className="section-label">Integrations</div>
+        <div className="section-label">Main</div>
         <div className="integration-list">
-          {integrations.map((integration) => (
-            <button
-              key={integration.id}
-              className={`integration-item ${currentIntegration === integration.id ? 'active' : ''}`}
-              onClick={() => onSelectIntegration(integration.id)}
-            >
-              <img src={integration.icon} className="integration-icon"></img>
-              <div className="integration-info">
-                <div className="integration-name">{integration.name}</div>
-                <div className="integration-description">{integration.description}</div>
-              </div>
-            </button>
-          ))}
+          <button
+            className={`integration-item ${currentPage === 'home' ? 'active' : ''}`}
+            onClick={() => onSelectPage('home')}
+          >
+            <div className="integration-info">
+              <div className="integration-name">Home</div>
+              <div className="integration-description">View all applications</div>
+            </div>
+          </button>
         </div>
       </div>
 
       <div className="sidebar-footer">
         <button
-          className={`settings-button ${currentIntegration === 'app-settings' ? 'active' : ''}`}
-          onClick={() => onSelectIntegration('app-settings')}
+          className={`settings-button ${currentPage === 'app-settings' ? 'active' : ''}`}
+          onClick={() => onSelectPage('app-settings')}
         >
           <div className="settings-icon">
             <img src={settingsIcon} alt="Settings" className="settings-icon-img" />

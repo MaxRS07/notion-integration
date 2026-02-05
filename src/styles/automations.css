@@ -1,0 +1,72 @@
+/* Automations and Actions */
+
+.automations-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.automations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.automations-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.automations-description {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.automations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.automations-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 80px 20px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.empty-description {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.actions-empty-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

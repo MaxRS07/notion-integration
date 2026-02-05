@@ -4,9 +4,10 @@ import { Assignment } from "../models/canvas/assignment";
 
 export const checkCanvasStatus = async (token: string, domain: string): Promise<boolean> => {
     try {
-        await invoke("validate_cavas_token", { token: token, domain: domain });
+        await invoke("validate_canvas_token", { token: token, domain: domain });
         return true;
     } catch (err) {
+        console.log("Canvas connection error:", err);
         return false
     }
 }

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 
 export const LoggingBlock: BlockDefinition<string> = {
     type: BlockType.FUNCTION,
-    label: "Logs data to console output",
+    label: "Log data to console output",
     img: functionIcon,
 
     defaultData: "",

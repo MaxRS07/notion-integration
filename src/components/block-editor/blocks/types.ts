@@ -1,6 +1,6 @@
 import { JSX, Dispatch, SetStateAction } from "react";
 import { NotionType } from "../../../models/notion/types";
-import { VariableGroup, RuntimeVars } from "../../../models/shared/mapvar";
+import { VariableGroup, RuntimeVars, ScopePath, ScopeContext } from "../../../models/shared/mapvar";
 
 export enum BlockType {
     GET = "get",
@@ -16,6 +16,9 @@ export interface BlockEditorContext {
     setRuntimeVars: Dispatch<SetStateAction<RuntimeVars>>;
     // the index of the current block being edited
     blockIndex?: number;
+    // scope context for nested blocks (loops, conditions, etc.)
+    scopeContext?: ScopeContext;
+    setScopeContext?: Dispatch<SetStateAction<ScopeContext>>;
 }
 export interface BlockRuntimeContext {
     runtimeVars: RuntimeVars;
@@ -27,6 +30,10 @@ export interface BlockDefinition<TData = any> {
     label: string;
     icon?: React.ReactNode;
     img?: string;
+    // whether this block can be expanded/collapsed (default: true)
+    isExpandable?: boolean;
+    // optional custom header for collapsed view (default: shows label)
+    getCollapsedHeader?: (props: BlockRenderProps<TData>) => JSX.Element;
 
     defaultData: TData;
 

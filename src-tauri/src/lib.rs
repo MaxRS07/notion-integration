@@ -40,7 +40,7 @@ async fn get_assignments(
         .map_err(|e| e.to_string())
 }
 #[tauri::command]
-async fn validate_cavas_token(token: String, domain: String) -> Result<(), String> {
+async fn validate_canvas_token(token: String, domain: String) -> Result<(), String> {
     CanvasClient::new(token, domain)
         .ping()
         .await
@@ -95,7 +95,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_courses,
             get_assignments,
-            validate_cavas_token,
+            validate_canvas_token,
             get_notion_user,
             query_user_pages,
             add_database_entry

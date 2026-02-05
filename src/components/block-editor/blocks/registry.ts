@@ -2,6 +2,7 @@
 import { GetCanvasAnnouncements, GetCanvasAssignments, GetCanvasCourses, GetCanvasGrades } from './CanvasGet';
 import { NotionAddBlock, NotionAddChildPage, NotionAddDatabaseEntry, NotionEditPage, NotionMakeComment } from './NotionBlock';
 import { LoggingBlock } from './ProgramBlock';
+import { ForLoopBlock } from './ForLoopBlock';
 import { BlockDefinition } from './types';
 
 export const BLOCKS: Record<string, Record<string, BlockDefinition>> = {
@@ -20,5 +21,8 @@ export const BLOCKS: Record<string, Record<string, BlockDefinition>> = {
     },
     "Function": {
         "Log Data To Console": LoggingBlock
+    },
+    "Control Flow": {
+        "For Loop": ForLoopBlock,
     }
 } as const;

@@ -1,13 +1,14 @@
 // CanvasGetBlocks.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BlockEditorContext, BlockDefinition, BlockRenderProps, BlockType, BlockRuntimeContext } from './types';
 import canvas from '../../../assets/icons/canvas.svg';
 import './BlockStyles.css';
-import { getAllAssignments, getUserCourses } from '../../../utils/canvas';
+import { checkCanvasStatus, getAllAssignments, getUserCourses } from '../../../utils/canvas';
 import { storage } from '../../../utils/storage';
-import { VariableGroup, RuntimeVariable } from '../../../models/shared/mapvar';
+import { RuntimeVariable } from '../../../models/shared/mapvar';
 import { Course } from '../../../models/canvas/course';
 import { camelToTitleCase } from '../../../utils/extensions';
+import { LoadingStatusIndicator } from '../../AppSettings';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -29,6 +30,21 @@ function CanvasGetRenderer(props: BlockRenderProps<CanvasTriggerData> & { title:
 
   const domain = data?.domain ?? '';
   const token = data?.token ?? '';
+
+  const [connected, setConnected] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (data.token && data.domain) {
+      setConnected(null);
+      checkCanvasStatus(data.token, data.domain).then(isConnected => {
+        if (!isConnected) {
+          setConnected("Connection failed. Please check your token and domain.");
+        } else {
+          setConnected('');
+        }
+      });
+    }
+  }, [data])
 
   return (
     <div>
@@ -91,6 +107,7 @@ function CanvasGetRenderer(props: BlockRenderProps<CanvasTriggerData> & { title:
             <p className="form-help">
               Get your token from Canvas → Account → Settings → New Access Token
             </p>
+            {data.token && data.domain && <LoadingStatusIndicator connected={connected} />}
           </div>
         </div>
       }

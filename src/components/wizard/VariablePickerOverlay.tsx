@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { VariableGroup, VariableOption } from '../../models/shared/mapvar';
+import { VariableGroup, VariableOption, ScopePath } from '../../models/shared/mapvar';
+import { isVariableAccessible } from '../../utils/scopes';
 import { NotionColorMap } from '../../utils/notion';
 
 function lastIndexOf(str: string, match: (char: string) => boolean) {
@@ -22,6 +23,8 @@ export interface VariablePickerOverlayProps {
     inputElement?: HTMLElement | HTMLInputElement;
     // block index to filter variables from previous blocks only
     blockIndex?: number;
+    // current scope path for nested block access
+    currentScopePath?: ScopePath;
 }
 
 export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
@@ -32,6 +35,7 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
     variableGroups,
     inputElement,
     blockIndex,
+    currentScopePath,
 }) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const overlayRef = useRef<HTMLDivElement>(null);
@@ -71,8 +75,8 @@ export const VariablePickerOverlay: React.FC<VariablePickerOverlayProps> = ({
             options: group.options.filter(opt => {
                 // Filter by search query
                 const matchesQuery = opt.name.replace(" ", "").toLowerCase().includes((query ?? '').toLowerCase().replace(" ", ""));
-                // Filter by block index - only show variables from earlier blocks
-                const isAccessible = blockIndex === undefined || opt.sourceBlockIndex === undefined || opt.sourceBlockIndex < blockIndex;
+                // Filter by block index and scope accessibility
+                const isAccessible = isVariableAccessible(opt, blockIndex ?? 0, currentScopePath);
                 return matchesQuery && isAccessible;
             }),
         }))

@@ -401,6 +401,9 @@
   margin-right: 6px;
   vertical-align: text-bottom;
 }
+.variable-inline-block.large {
+  font-size: 16px;
+}
 .mapping-input[contenteditable="true"] {
   min-height: 36px;
   padding: 10px 12px;
@@ -423,4 +426,22 @@
   height: 12px;
   vertical-align: middle;
   margin-right: 4px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }

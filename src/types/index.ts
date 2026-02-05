@@ -1,10 +1,11 @@
 export interface Settings {
-  canvasToken: string;
-  canvasSchoolName: string;
   notionToken: string;
   syncInterval: number;
   autoSync: boolean;
-  themeMode: 'system' | 'light' | 'dark';
+  themeMode: 'system' | 'light' | 'dark' | 'midnight';
+  // Canvas-specific (can be extended for other apps)
+  canvasToken?: string;
+  canvasSchoolName?: string;
 }
 
 export interface SyncStatus {

@@ -5,6 +5,7 @@ import load from '../assets/icons/loading.svg'
 import User from "../models/notion/user"
 import PageQuery, { Result } from "../models/notion/page_query"
 import { getNotionUserInfo, getPageList } from '../utils/notion';
+import { useSystemTheme } from '../utils/useSystemTheme';
 
 interface AppSettingsProps {
   settings: Settings;
@@ -16,13 +17,40 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ settings: initialSetti
   const [showNotionToken, setShowNotionToken] = useState(false);
   const [connected, setConnected] = useState<string | null>(null)
   const [userInfo, setUserInfo] = useState<User | null>(null)
-  const [pages, setPages] = useState<string>("No pages found");
+  const systemTheme = useSystemTheme();
 
   useEffect(() => {
     setConnected(null);
     handleSave()
     handleConnection()
-  }, [settings])
+  }, [settings.notionToken])
+
+  useEffect(() => {
+    applyTheme(settings.themeMode);
+  }, [settings.themeMode, systemTheme])
+
+  const applyTheme = (themeMode: string) => {
+    const root = document.documentElement;
+
+    if (themeMode === 'system') {
+      if (systemTheme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        root.style.setProperty('--bg-midnight', '0');
+      } else {
+        root.removeAttribute('data-theme');
+        root.style.setProperty('--bg-midnight', '0');
+      }
+    } else if (themeMode === 'midnight') {
+      root.setAttribute('data-theme', 'dark');
+      root.style.setProperty('--bg-midnight', '1');
+    } else if (themeMode === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+      root.style.setProperty('--bg-midnight', '0');
+    } else {
+      root.removeAttribute('data-theme');
+      root.style.setProperty('--bg-midnight', '0');
+    }
+  };
 
   const handleSave = () => {
     storage.saveSettings(settings);
@@ -86,7 +114,6 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ settings: initialSetti
                 {userInfo?.results[0].person?.email}
               </p>
             }
-            <p>{pages}</p>
           </div>
 
           <div className="info-box">
@@ -125,6 +152,13 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ settings: initialSetti
               >
                 <span className="theme-icon">🌙</span>
                 <span>Dark</span>
+              </button>
+              <button
+                className={`theme-option ${settings.themeMode === 'midnight' ? 'active' : ''}`}
+                onClick={() => setSettings({ ...settings, themeMode: 'midnight' })}
+              >
+                <span className="theme-icon">🌑</span>
+                <span>Midnight</span>
               </button>
               <button
                 className={`theme-option ${settings.themeMode === 'system' ? 'active' : ''}`}
