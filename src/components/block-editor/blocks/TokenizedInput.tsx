@@ -10,9 +10,6 @@ import {
   Descendant,
   Editor,
   Element as SlateElement,
-  Node,
-  Path,
-  Range,
   Transforms,
 } from 'slate';
 import {
@@ -454,77 +451,3 @@ export const TokenizedInput = forwardRef<TokenizedInputHandle, TokenizedInputPro
 );
 
 TokenizedInput.displayName = 'TokenizedInput';
-
-/* ================================================================== */
-/* SingleVariableInput: Select exactly one variable                  */
-/* ================================================================== */
-
-interface SingleVariableInputProps {
-  value?: VariableOption | null;
-  onChange: (variable: VariableOption | null) => void;
-  placeholder?: string;
-  variableGroups: VariableGroup[];
-  blockIndex: number;
-}
-
-export const SingleVariableInput = React.forwardRef<
-  HTMLDivElement,
-  SingleVariableInputProps
->(({ value, onChange, placeholder = 'Select variable...', variableGroups, blockIndex }, ref) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const inputRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <div
-      ref={ref || inputRef}
-      className="single-variable-input"
-      onClick={() => setIsOpen(true)}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        padding: '4px 8px',
-        border: '1px solid var(--border-color)',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        backgroundColor: 'var(--bg-secondary)',
-        minWidth: '120px',
-      }}
-    >
-      {value ? (
-        <span
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {value.img && (
-            <img
-              src={value.img}
-              style={{ width: 14, height: 14 }}
-              alt={value.name}
-            />
-          )}
-          <span>{value.name}</span>
-        </span>
-      ) : (
-        <span style={{ color: 'var(--text-tertiary)' }}>{placeholder}</span>
-      )}
-
-      <VariablePickerOverlay
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        variableGroups={variableGroups}
-        blockIndex={blockIndex}
-        inputElement={inputRef.current || undefined}
-        onSelect={(variable) => {
-          onChange(variable);
-          setIsOpen(false);
-        }}
-      />
-    </div>
-  );
-});
-
-SingleVariableInput.displayName = 'SingleVariableInput';

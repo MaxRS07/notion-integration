@@ -31,9 +31,10 @@ export interface BlockDefinition<TData = any> {
     icon?: React.ReactNode;
     img?: string;
     // whether this block can be expanded/collapsed (default: true)
-    isExpandable?: boolean;
     // optional custom header for collapsed view (default: shows label)
-    getCollapsedHeader?: (props: BlockRenderProps<TData>) => JSX.Element;
+    renderHeader?: (props: BlockRenderProps<TData>) => JSX.Element;
+    // whether this block can contain child blocks (default: false)
+    canHaveChildren?: boolean;
 
     defaultData: TData;
 

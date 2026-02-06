@@ -15,8 +15,8 @@ import { LoadingStatusIndicator } from '../../AppSettings';
 /* ------------------------------------------------------------------ */
 
 interface CanvasTriggerData {
-  token: string;
-  domain: string;
+  token?: string;
+  domain?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -164,6 +164,7 @@ export const GetCanvasCourses = createCanvasGetBlock({
   label: 'Get Courses from Canvas',
   description: 'Import your enrolled courses from Canvas',
   onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => {
+    if (!data.token || !data.domain) return;
     const courses = await getUserCourses(data.token, data.domain)
     const id = crypto.randomUUID();
     const rv: RuntimeVariable<Course[]> = { id, value: courses };
@@ -196,6 +197,7 @@ export const GetCanvasAssignments = createCanvasGetBlock({
   label: 'Get Assignments from Canvas',
   description: 'Sync assignments and due dates',
   onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => {
+    if (!data.token || !data.domain) return;
     getAllAssignments(data.token, data.domain).then(assignments => {
       const id = crypto.randomUUID();
       const rv: RuntimeVariable<any[]> = { id, value: assignments };
@@ -207,11 +209,13 @@ export const GetCanvasAssignments = createCanvasGetBlock({
 export const GetCanvasAnnouncements = createCanvasGetBlock({
   label: 'Get Announcements from Canvas',
   description: 'Get course announcements',
+  onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => { }
 });
 
 export const GetCanvasGrades = createCanvasGetBlock({
   label: 'Get Grades from Canvas',
   description: 'Track your grades and scores',
+  onRun: async (data: CanvasTriggerData, context: BlockRuntimeContext) => { }
 });
 
 /* ------------------------------------------------------------------ */

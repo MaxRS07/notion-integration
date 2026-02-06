@@ -43,31 +43,27 @@ export const FlowBlock: React.FC<FlowBlockProps> = ({
             onDragEnd={onDragEnd}
         >
             <div className="block-controls">
-                {block.definition.isExpandable || block.definition.isExpandable === undefined && (
-                    <button onClick={onToggleCollapse} className="block-control-btn">
-                        {isCollapsed ? "▼" : "▲"}
-                    </button>
-                )}
+                <button onClick={onToggleCollapse} className="block-control-btn">
+                    {isCollapsed ? "▼" : "▲"}
+                </button>
                 <button className="block-control-btn block-remove" onClick={onRemove}>
                     ✕
                 </button>
             </div>
 
             <div className="block-content">
-                {isCollapsed || block.definition.isExpandable === false ? (
-                    block.definition.getCollapsedHeader ? (
-                        block.definition.getCollapsedHeader({
-                            data: block.data,
-                            onChange: onUpdate,
-                            displayVariableGroups,
-                            setDisplayVariableGroups,
-                            runtimeVars,
-                            setRuntimeVars,
-                            blockIndex: index,
-                        })
-                    ) : (
-                        <h3>{block.definition.label}</h3>
-                    )
+                {block.definition.renderHeader ? (
+                    block.definition.renderHeader({
+                        data: block.data,
+                        onChange: onUpdate,
+                        displayVariableGroups,
+                        setDisplayVariableGroups,
+                        runtimeVars,
+                        setRuntimeVars,
+                        blockIndex: index,
+                    })
+                ) : isCollapsed ? (
+                    <h3>{block.definition.label}</h3>
                 ) : (
                     <BlockRenderer
                         block={block}
@@ -81,6 +77,30 @@ export const FlowBlock: React.FC<FlowBlockProps> = ({
                     />
                 )}
             </div>
+
+            {/* Render child blocks if they exist and block is expanded */}
+            {block.children && block.children.length > 0 && !isCollapsed && (
+                <div className="block-children" style={{ marginLeft: '20px', marginTop: '12px', paddingLeft: '12px', borderLeft: '2px solid var(--border-color)' }}>
+                    {block.children.map((childBlock) => (
+                        <FlowBlock
+                            key={childBlock.id}
+                            block={childBlock}
+                            index={index}
+                            isCollapsed={false}
+                            isDragging={false}
+                            onToggleCollapse={() => { }}
+                            onRemove={() => { }}
+                            onUpdate={() => { }}
+                            onDragStart={() => { }}
+                            onDragEnd={() => { }}
+                            displayVariableGroups={displayVariableGroups}
+                            setDisplayVariableGroups={setDisplayVariableGroups}
+                            runtimeVars={runtimeVars}
+                            setRuntimeVars={setRuntimeVars}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BlockDefinition, BlockRenderProps } from './types';
 import { VariableOption } from '../../../models/shared/mapvar';
-import { SingleVariableInput, TokenizedInput } from './TokenizedInput';
+import { SingleVariableInput } from './SingleVariableInput';
 
 export interface ForLoopBlockData {
     variableOption: VariableOption | null;
@@ -12,21 +12,20 @@ export const ForLoopBlock: BlockDefinition<ForLoopBlockData> = {
     type: 'for-loop' as any,
     label: 'For Loop',
     icon: '🔄',
-    isExpandable: false,
+    canHaveChildren: true,
     defaultData: {
         variableOption: null,
         description: 'Loops over items in an array',
     },
 
-    getCollapsedHeader: (props) => {
-        const [input, setInput] = React.useState('Array');
+    renderHeader: (props) => {
         return (
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
                 <h3>For each <span className='variable-inline-block large'>Item</span> in</h3>
                 <div style={{ flex: 1, minWidth: '200px' }}>
                     <div style={{ maxWidth: '30%' }}>
                         <SingleVariableInput
-                            placeholder='Array'
+                            placeholder='any array'
                             value={props.data.variableOption}
                             variableGroups={props.displayVariableGroups}
                             onChange={(s) => props.onChange({ ...props.data, variableOption: s })}
